@@ -1,0 +1,17 @@
+[package]
+name = "rust"
+version = "0.1.0"
+authors = ["Elliana <me@mause.me>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serenity = "*"
+tokio-postgres = "*"
+typemap_rev = "*"
+rustls = "*"
+dotenv = "*"
+postgres-native-tls = "*"
+native-tls = "*"
