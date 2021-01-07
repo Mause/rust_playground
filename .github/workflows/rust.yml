@@ -33,3 +33,4 @@ jobs:
       run: cargo test --verbose
       env:
         DATABASE_URL: postgres://postgres:postgres@postgres
+        BOT_TOKEN: DUMMY
