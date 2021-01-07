@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 tokio = { version = "0.3", features = ["full"] }
 serenity = "*"
-tokio-postgres = "0.6"
+tokio-postgres = "0.7"
 typemap_rev = "*"
 rustls = "*"
 dotenv = "*"
