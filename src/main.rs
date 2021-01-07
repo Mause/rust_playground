@@ -10,7 +10,6 @@ use serenity::model::channel::Message;
 use std::env;
 use tokio_postgres::Socket;
 use typemap_rev::TypeMapKey;
-extern crate dotenv;
 use dotenv::dotenv;
 
 mod test;
