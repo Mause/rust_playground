@@ -2,7 +2,7 @@
 mod tests {
     #[test]
     fn it_works() {
-        main();
+        crate::main();
 
         assert_eq!(2 + 2, 4)
     }

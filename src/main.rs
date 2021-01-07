@@ -13,6 +13,8 @@ use typemap_rev::TypeMapKey;
 extern crate dotenv;
 use dotenv::dotenv;
 
+mod test;
+
 struct Handler;
 
 #[group]
