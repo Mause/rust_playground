@@ -8,7 +8,7 @@ use serenity::async_trait;
 use serenity::client::{Client, Context, EventHandler};
 use serenity::framework::standard::{
     macros::{command, group},
-    CommandResult, StandardFramework,
+    Args, CommandResult, StandardFramework,
 };
 use serenity::model::channel::Message;
 use std::env;
@@ -21,7 +21,7 @@ mod test;
 struct Handler;
 
 #[group]
-#[commands(ping, load)]
+#[commands(ping, load, store)]
 struct General;
 
 #[async_trait]
@@ -69,6 +69,39 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(why) = client.start().await {
         eprintln!("An error occured while running the client: {:?}", why);
     }
+
+    Ok(())
+}
+
+#[command]
+async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+    if args.is_empty() {
+        msg.reply_mention(ctx, "Looks like you forgot to pass a location")
+            .await?;
+        return Ok(());
+    }
+
+    let location = args.message();
+
+    // magic google maps lookup
+
+    let client = read_client(ctx).await;
+
+    client
+        .execute(
+            "INSERT INTO LOCATION (guild_id, member_id, location) values ($1, $2, $3)",
+            &[
+                &U64 {
+                    item: msg.guild_id.expect("No guild?").0,
+                },
+                &U64 {
+                    item: msg.author.id.0,
+                },
+                &location,
+            ],
+        )
+        .await
+        .expect("Insert failed");
 
     Ok(())
 }
