@@ -39,8 +39,7 @@ async fn connect_to_postgres() -> Result<tokio_postgres::Client, Box<dyn std::er
         }
     });
 
-    let res = client.execute("SELECT 1", &[]).await?;
-    println!("{:?}", res);
+    println!("Sanity check: {:?}", client.execute("SELECT 1", &[]).await?);
 
     Ok(client)
 }
