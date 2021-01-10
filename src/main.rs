@@ -78,7 +78,7 @@ async fn load(ctx: &Context, msg: &Message) -> CommandResult {
 
     let data = ctx.data.read().await;
 
-    let client = &(*data).get::<ClientHolder>().unwrap().client;
+    let client = &data.get::<ClientHolder>().unwrap().client;
 
     let res = client
         .query_one(
