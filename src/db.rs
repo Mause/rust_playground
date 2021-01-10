@@ -1,7 +1,6 @@
-use tokio_postgres::types::FromSql;
 use bytes::{Buf, BufMut, BytesMut};
-use tokio_postgres::types::{IsNull, ToSql, Type};
 use tokio_pg_mapper_derive::PostgresMapper;
+use tokio_postgres::types::{FromSql, IsNull, ToSql, Type};
 
 #[derive(Debug)]
 pub struct U64 {
@@ -32,7 +31,7 @@ impl ToSql for U64 {
         Ok(IsNull::No)
     }
     fn accepts(_ty: &Type) -> bool {
-        return true;
+        true
     }
 }
 

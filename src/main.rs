@@ -13,8 +13,8 @@ use serenity::model::channel::Message;
 use std::env;
 use tokio_pg_mapper::FromTokioPostgresRow;
 
-mod db;
 mod client_holder;
+mod db;
 mod test;
 
 struct Handler;
@@ -71,7 +71,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-
 
 #[command]
 async fn store(ctx: &Context, msg: &Message) -> CommandResult {
