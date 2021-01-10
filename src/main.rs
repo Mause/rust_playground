@@ -1,4 +1,6 @@
 use crate::client_holder::ClientHolder;
+use crate::db::{Location, U64};
+use dotenv::dotenv;
 use native_tls::TlsConnector;
 use postgres_native_tls::MakeTlsConnector;
 use serenity::async_trait;
@@ -9,10 +11,9 @@ use serenity::framework::standard::{
 };
 use serenity::model::channel::Message;
 use std::env;
-use tokio_postgres::Socket;
-use typemap_rev::TypeMapKey;
-use dotenv::dotenv;
+use tokio_pg_mapper::FromTokioPostgresRow;
 
+mod db;
 mod client_holder;
 mod test;
 
@@ -80,7 +81,27 @@ async fn store(ctx: &Context, msg: &Message) -> CommandResult {
 
     let client = &(*data).get::<ClientHolder>().unwrap().client;
 
-    client.execute("SELECT 1", &[]).await?;
+    let res = client
+        .query(
+            "SELECT * FROM LOCATION where guild_id = $1 and member_id = $2",
+            &[
+                &U64 { item: guild },
+                &U64 {
+                    item: msg.author.id.0,
+                },
+            ],
+        )
+        .await
+        .expect("antway.....");
+
+    println!("Res: {:?}", res);
+
+    let rows = res
+        .iter()
+        .map(|row| Location::from_row_ref(row).unwrap())
+        .collect::<Vec<_>>();
+
+    println!("{:?}", rows);
 
     Ok(())
 }
