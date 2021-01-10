@@ -79,7 +79,7 @@ impl TypeMapKey for ClientHolder {
 
 #[command]
 async fn store(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild_id;
+    let guild = msg.guild_id.expect("No guild?").0;
 
     let data = ctx.data.read().await;
 
