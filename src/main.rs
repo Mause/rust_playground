@@ -1,3 +1,4 @@
+use crate::client_holder::read_client;
 use crate::client_holder::ClientHolder;
 use crate::db::{Location, U64};
 use dotenv::dotenv;
@@ -76,9 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn load(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = msg.guild_id.expect("No guild?").0;
 
-    let data = ctx.data.read().await;
-
-    let client = &data.get::<ClientHolder>().unwrap().client;
+    let client = read_client(ctx).await;
 
     let res = client
         .query_one(
