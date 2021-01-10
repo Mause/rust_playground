@@ -26,7 +26,9 @@ impl EventHandler for Handler {}
 async fn connect_to_postgres() -> Result<tokio_postgres::Client, Box<dyn std::error::Error>> {
     let database_url = &env::var("DATABASE_URL").expect("database_url");
 
-    let na = TlsConnector::builder().danger_accept_invalid_certs(true).build()?;
+    let na = TlsConnector::builder()
+        .danger_accept_invalid_certs(true)
+        .build()?;
     let connector = MakeTlsConnector::new(na);
 
     let (client, connection) = tokio_postgres::connect(database_url, connector).await?;
