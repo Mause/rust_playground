@@ -20,7 +20,7 @@ mod test;
 struct Handler;
 
 #[group]
-#[commands(ping, store)]
+#[commands(ping, load)]
 struct General;
 
 #[async_trait]
@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[command]
-async fn store(ctx: &Context, msg: &Message) -> CommandResult {
+async fn load(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = msg.guild_id.expect("No guild?").0;
 
     let data = ctx.data.read().await;
@@ -81,7 +81,7 @@ async fn store(ctx: &Context, msg: &Message) -> CommandResult {
     let client = &(*data).get::<ClientHolder>().unwrap().client;
 
     let res = client
-        .query(
+        .query_one(
             "SELECT * FROM LOCATION where guild_id = $1 and member_id = $2",
             &[
                 &U64 { item: guild },
@@ -93,14 +93,14 @@ async fn store(ctx: &Context, msg: &Message) -> CommandResult {
         .await
         .expect("antway.....");
 
-    println!("Res: {:?}", res);
+    let row = Location::from_row(res).unwrap();
+    println!("{:?}", row);
 
-    let rows = res
-        .iter()
-        .map(|row| Location::from_row_ref(row).unwrap())
-        .collect::<Vec<_>>();
-
-    println!("{:?}", rows);
+    msg.reply_mention(
+        ctx,
+        format!("I have you down as living in {}", row.location),
+    )
+    .await?;
 
     Ok(())
 }
