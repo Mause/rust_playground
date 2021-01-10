@@ -48,7 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     let framework = StandardFramework::new()
-        .configure(|c| c.prefix("!lc"))
+        .configure(|c| c.prefix("!lc "))
         .group(&GENERAL_GROUP);
 
     let client = connect_to_postgres().await?;
