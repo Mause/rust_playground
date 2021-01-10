@@ -91,7 +91,7 @@ async fn load(ctx: &Context, msg: &Message) -> CommandResult {
             ],
         )
         .await
-        .expect("antway.....");
+        .expect("location query failed");
 
     let row = Location::from_row(res).unwrap();
     println!("{:?}", row);
