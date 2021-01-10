@@ -1,3 +1,4 @@
+use crate::client_holder::ClientHolder;
 use native_tls::TlsConnector;
 use postgres_native_tls::MakeTlsConnector;
 use serenity::async_trait;
@@ -12,6 +13,7 @@ use tokio_postgres::Socket;
 use typemap_rev::TypeMapKey;
 use dotenv::dotenv;
 
+mod client_holder;
 mod test;
 
 struct Handler;
@@ -69,13 +71,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-struct ClientHolder {
-    client: tokio_postgres::Client,
-}
-
-impl TypeMapKey for ClientHolder {
-    type Value = ClientHolder;
-}
 
 #[command]
 async fn store(ctx: &Context, msg: &Message) -> CommandResult {
