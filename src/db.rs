@@ -1,6 +1,7 @@
 use tokio_postgres::types::FromSql;
 use bytes::{Buf, BufMut, BytesMut};
 use tokio_postgres::types::{IsNull, ToSql, Type};
+use tokio_pg_mapper_derive::PostgresMapper;
 
 #[derive(Debug)]
 pub struct U64 {
@@ -52,8 +53,6 @@ impl FromSql<'_> for U64 {
         true
     }
 }
-
-use tokio_pg_mapper_derive::PostgresMapper;
 
 #[derive(PostgresMapper, Debug)]
 #[pg_mapper(table = "location")]
