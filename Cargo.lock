@@ -1086,7 +1086,7 @@ dependencies = [
 name = "rust"
 version = "0.1.0"
 dependencies = [
- "bytes 0.5.6",
+ "bytes 1.0.0",
  "dotenv",
  "native-tls",
  "postgres-native-tls",
