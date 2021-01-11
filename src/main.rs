@@ -1,6 +1,7 @@
 use crate::client_holder::read_client;
 use crate::client_holder::ClientHolder;
 use crate::db::{Location, U64};
+use crate::google_maps::sync_resolve_location;
 use dotenv::dotenv;
 use native_tls::TlsConnector;
 use postgres_native_tls::MakeTlsConnector;
@@ -16,6 +17,7 @@ use tokio_pg_mapper::FromTokioPostgresRow;
 
 mod client_holder;
 mod db;
+mod google_maps;
 mod test;
 
 struct Handler;
@@ -83,7 +85,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let location = args.message();
 
-    // magic google maps lookup
+    let resolved_location = sync_resolve_location(location);
 
     let client = read_client(ctx).await;
 
@@ -97,7 +99,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
                 &U64 {
                     item: msg.author.id.0,
                 },
-                &location,
+                &resolved_location,
             ],
         )
         .await
