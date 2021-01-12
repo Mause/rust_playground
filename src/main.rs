@@ -90,23 +90,47 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let client = read_client(ctx).await;
 
+    let guild_id = msg.guild_id.expect("No guild?").0;
+    let member_id = msg.author.id.0;
+
+    if exists_by(&client, guild_id, member_id).await.unwrap() {
+        update_existing(&*client, guild_id, member_id, resolved_location).await;
+    } else {
+        insert_new(&client, guild_id, member_id, resolved_location).await;
+    }
+
+    Ok(())
+}
+
+async fn update_existing(client: &tokio_postgres::Client, guild_id: u64, member_id: u64, location: String) {
+    todo!();
+}
+
+async fn exists_by(
+    client: &tokio_postgres::Client,
+    guild_id: u64,
+    member_id: u64,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    Ok(load_location(client, guild_id, member_id).await.unwrap().is_some())
+}
+
+async fn insert_new(
+    client: &tokio_postgres::Client,
+    guild_id: u64,
+    member_id: u64,
+    resolved_location: String,
+) {
     client
         .execute(
             "INSERT INTO LOCATION (guild_id, member_id, location) values ($1, $2, $3)",
             &[
-                &U64 {
-                    item: msg.guild_id.expect("No guild?").0,
-                },
-                &U64 {
-                    item: msg.author.id.0,
-                },
+                &U64 { item: guild_id },
+                &U64 { item: member_id },
                 &resolved_location,
             ],
         )
         .await
         .expect("Insert failed");
-
-    Ok(())
 }
 
 async fn load_location(
