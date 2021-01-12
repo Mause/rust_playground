@@ -7,6 +7,12 @@ pub struct U64 {
     pub item: u64,
 }
 
+impl U64 {
+    pub fn new(i: u64) -> U64 {
+        U64 { item: i }
+    }
+}
+
 impl ToSql for U64 {
     fn to_sql(
         &self,

@@ -125,8 +125,8 @@ async fn insert_new(
         .execute(
             "INSERT INTO LOCATION (guild_id, member_id, location) values ($1, $2, $3)",
             &[
-                &U64 { item: guild_id },
-                &U64 { item: member_id },
+                &U64::new(guild_id),
+                &U64::new(member_id),
                 &resolved_location,
             ],
         )
@@ -142,7 +142,7 @@ async fn load_location(
     client
         .query_opt(
             "SELECT * FROM LOCATION where guild_id = $1 and member_id = $2",
-            &[&U64 { item: guild_id }, &U64 { item: member_id }],
+            &[&U64::new(guild_id), &U64::new(member_id)],
         )
         .await
         .expect("location query failed")
