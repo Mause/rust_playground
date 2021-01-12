@@ -108,7 +108,13 @@ async fn update_existing(
     member_id: u64,
     location: String,
 ) {
-    todo!();
+    client
+        .execute(
+            "UPDATE LOCATION SET location=$3 where guild_id=$1 and member_id=$2",
+            &[&U64::new(guild_id), &U64::new(member_id), &location],
+        )
+        .await
+        .expect("Update failed");
 }
 
 async fn exists_by(client: &tokio_postgres::Client, guild_id: u64, member_id: u64) -> bool {
