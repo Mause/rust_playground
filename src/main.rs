@@ -14,6 +14,7 @@ use serenity::framework::standard::{
 use serenity::model::channel::Message;
 use std::env;
 use tokio_pg_mapper::FromTokioPostgresRow;
+use tokio_postgres::Row;
 
 mod client_holder;
 mod db;
@@ -108,24 +109,27 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     Ok(())
 }
 
+async fn load_location(
+    client: tokio_postgres::Client,
+    guild_id: u64,
+    member_id: u64,
+) -> Result<Option<Row>, Box<dyn std::error::Error>> {
+    Ok(client
+        .query_opt(
+            "SELECT * FROM LOCATION where guild_id = $1 and member_id = $2",
+            &[&U64 { item: guild_id }, &U64 { item: member_id }],
+        )
+        .await
+        .expect("location query failed"))
+}
+
 #[command]
 async fn load(ctx: &Context, msg: &Message) -> CommandResult {
     let guild = msg.guild_id.expect("No guild?").0;
 
     let client = read_client(ctx).await;
 
-    let res = client
-        .query_opt(
-            "SELECT * FROM LOCATION where guild_id = $1 and member_id = $2",
-            &[
-                &U64 { item: guild },
-                &U64 {
-                    item: msg.author.id.0,
-                },
-            ],
-        )
-        .await
-        .expect("location query failed");
+    let res = load_location(*client, guild, msg.author.id.0).await.unwrap();
 
     let response = match res {
         None => "Sorry, I don't know where you live".to_string(),
