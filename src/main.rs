@@ -115,7 +115,7 @@ async fn load(ctx: &Context, msg: &Message) -> CommandResult {
     let client = read_client(ctx).await;
 
     let res = client
-        .query_one(
+        .query_opt(
             "SELECT * FROM LOCATION where guild_id = $1 and member_id = $2",
             &[
                 &U64 { item: guild },
@@ -127,14 +127,16 @@ async fn load(ctx: &Context, msg: &Message) -> CommandResult {
         .await
         .expect("location query failed");
 
-    let row = Location::from_row(res).unwrap();
-    println!("{:?}", row);
+    let response = match res {
+        None => "Sorry, I don't know where you live".to_string(),
+        Some(row) => {
+            let row = Location::from_row(row).unwrap();
 
-    msg.reply_mention(
-        ctx,
-        format!("I have you down as living in {}", row.location),
-    )
-    .await?;
+            format!("I have you down as living in {}", row.location)
+        }
+    };
+
+    msg.reply_mention(ctx, response).await?;
 
     Ok(())
 }
