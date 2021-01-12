@@ -93,7 +93,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = msg.guild_id.expect("No guild?").0;
     let member_id = msg.author.id.0;
 
-    if exists_by(&client, guild_id, member_id).await.unwrap() {
+    if exists_by(&client, guild_id, member_id).await {
         update_existing(&*client, guild_id, member_id, resolved_location).await;
     } else {
         insert_new(&client, guild_id, member_id, resolved_location).await;
@@ -102,16 +102,17 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     Ok(())
 }
 
-async fn update_existing(client: &tokio_postgres::Client, guild_id: u64, member_id: u64, location: String) {
-    todo!();
-}
-
-async fn exists_by(
+async fn update_existing(
     client: &tokio_postgres::Client,
     guild_id: u64,
     member_id: u64,
-) -> Result<bool, Box<dyn std::error::Error>> {
-    Ok(load_location(client, guild_id, member_id).await.unwrap().is_some())
+    location: String,
+) {
+    todo!();
+}
+
+async fn exists_by(client: &tokio_postgres::Client, guild_id: u64, member_id: u64) -> bool {
+    load_location(client, guild_id, member_id).await.is_some()
 }
 
 async fn insert_new(
@@ -137,14 +138,14 @@ async fn load_location(
     client: &tokio_postgres::Client,
     guild_id: u64,
     member_id: u64,
-) -> Result<Option<Row>, Box<dyn std::error::Error>> {
-    Ok(client
+) -> Option<Row> {
+    client
         .query_opt(
             "SELECT * FROM LOCATION where guild_id = $1 and member_id = $2",
             &[&U64 { item: guild_id }, &U64 { item: member_id }],
         )
         .await
-        .expect("location query failed"))
+        .expect("location query failed")
 }
 
 #[command]
@@ -153,9 +154,7 @@ async fn load(ctx: &Context, msg: &Message) -> CommandResult {
 
     let client = read_client(ctx).await;
 
-    let res = load_location(&client, guild, msg.author.id.0)
-        .await
-        .unwrap();
+    let res = load_location(&client, guild, msg.author.id.0).await;
 
     let response = match res {
         None => "Sorry, I don't know where you live".to_string(),
