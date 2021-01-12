@@ -110,7 +110,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 }
 
 async fn load_location(
-    client: tokio_postgres::Client,
+    client: &tokio_postgres::Client,
     guild_id: u64,
     member_id: u64,
 ) -> Result<Option<Row>, Box<dyn std::error::Error>> {
@@ -129,7 +129,9 @@ async fn load(ctx: &Context, msg: &Message) -> CommandResult {
 
     let client = read_client(ctx).await;
 
-    let res = load_location(*client, guild, msg.author.id.0).await.unwrap();
+    let res = load_location(&client, guild, msg.author.id.0)
+        .await
+        .unwrap();
 
     let response = match res {
         None => "Sorry, I don't know where you live".to_string(),
