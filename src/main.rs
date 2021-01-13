@@ -98,10 +98,12 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let member_id = msg.author.id.0;
 
     if exists_by(&client, guild_id, member_id).await {
-        update_existing(&*client, guild_id, member_id, resolved_location).await;
+        update_existing(&*client, guild_id, member_id, &resolved_location).await;
     } else {
-        insert_new(&client, guild_id, member_id, resolved_location).await;
+        insert_new(&client, guild_id, member_id, &resolved_location).await;
     }
+
+    msg.reply_mention(ctx, format!("Ok, I now have you down living at {}", resolved_location)).await?;
 
     Ok(())
 }
@@ -110,12 +112,12 @@ async fn update_existing(
     client: &tokio_postgres::Client,
     guild_id: u64,
     member_id: u64,
-    location: String,
+    location: &String,
 ) {
     client
         .execute(
             "UPDATE LOCATION SET location=$3 where guild_id=$1 and member_id=$2",
-            &[&U64::new(guild_id), &U64::new(member_id), &location],
+            &[&U64::new(guild_id), &U64::new(member_id), location],
         )
         .await
         .expect("Update failed");
@@ -129,7 +131,7 @@ async fn insert_new(
     client: &tokio_postgres::Client,
     guild_id: u64,
     member_id: u64,
-    resolved_location: String,
+    resolved_location: &String,
 ) {
     client
         .execute(
@@ -137,7 +139,7 @@ async fn insert_new(
             &[
                 &U64::new(guild_id),
                 &U64::new(member_id),
-                &resolved_location,
+                resolved_location,
             ],
         )
         .await
