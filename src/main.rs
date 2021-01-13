@@ -1,3 +1,4 @@
+use log::{set_max_level, LevelFilter};
 use crate::client_holder::read_client;
 use crate::client_holder::ClientHolder;
 use crate::db::{Location, U64};
@@ -12,6 +13,7 @@ use serenity::framework::standard::{
     Args, CommandResult, StandardFramework,
 };
 use serenity::model::channel::Message;
+use simple_logger::SimpleLogger;
 use std::env;
 use tokio_pg_mapper::FromTokioPostgresRow;
 use tokio_postgres::Row;
@@ -54,6 +56,8 @@ async fn connect_to_postgres() -> Result<tokio_postgres::Client, Box<dyn std::er
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
+    SimpleLogger::new().init().unwrap();
+    set_max_level(LevelFilter::Debug);
 
     let framework = StandardFramework::new()
         .configure(|c| c.prefix("!lc "))
