@@ -90,7 +90,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let location = args.message();
 
-    let resolved_location = sync_resolve_location(location);
+    let resolved_location = sync_resolve_location(location).await;
 
     let client = read_client(ctx).await;
 
