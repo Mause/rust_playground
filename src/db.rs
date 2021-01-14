@@ -15,6 +15,8 @@ fn convert_config(main_config: tokio_postgres::Config) -> Config {
     config.dbname = main_config.get_dbname().map(|a| a.to_string());
     config.host = match &main_config.get_hosts()[0] {
         Host::Tcp(u) => Some(u.to_string()),
+        #[cfg(unix)]
+        Host::Unix(u) => panic!("Invalid state")
     };
     config.user = main_config.get_user().map(|a| a.to_string());
     config.ssl_mode = Some(SslMode::Require);
