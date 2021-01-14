@@ -2,6 +2,7 @@ use bytes::{Buf, BufMut, BytesMut};
 use deadpool_postgres::config::SslMode;
 use deadpool_postgres::tokio_postgres;
 use deadpool_postgres::{Config, Pool};
+use log::info;
 use native_tls::TlsConnector;
 use postgres_native_tls::MakeTlsConnector;
 use std::env;
@@ -16,7 +17,7 @@ fn convert_config(main_config: tokio_postgres::Config) -> Config {
     config.host = match &main_config.get_hosts()[0] {
         Host::Tcp(u) => Some(u.to_string()),
         #[cfg(unix)]
-        Host::Unix(u) => panic!("Invalid state")
+        Host::Unix(u) => panic!("Invalid state"),
     };
     config.user = main_config.get_user().map(|a| a.to_string());
     config.ssl_mode = Some(SslMode::Require);
@@ -30,6 +31,8 @@ fn convert_config(main_config: tokio_postgres::Config) -> Config {
 
 pub async fn connect_to_postgres() -> Result<Pool, Box<dyn std::error::Error>> {
     let database_url = &env::var("DATABASE_URL").expect("database_url");
+
+    info!("Database url: {}", database_url);
 
     let na = TlsConnector::builder()
         .danger_accept_invalid_certs(true)
