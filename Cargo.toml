@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 tokio = { version = "*", features = ["full"] }
 serenity = "*"
-tokio-postgres = "*"
 typemap_rev = "*"
 rustls = "*"
 dotenv = "*"
@@ -24,3 +23,5 @@ futures-preview = "*"
 log = "*"
 tokio-compat-02 = "*"
 simple_logger = "*"
+deadpool-postgres = "*"
+deadpool = "*"
