@@ -82,7 +82,11 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
         insert_new(&client, guild_id, member_id, &resolved_location).await;
     }
 
-    msg.reply_mention(ctx, format!("Ok, I now have you down living at {}", resolved_location)).await?;
+    msg.reply_mention(
+        ctx,
+        format!("Ok, I now have you down living at {}", resolved_location),
+    )
+    .await?;
 
     Ok(())
 }
@@ -115,11 +119,7 @@ async fn insert_new(
     client
         .execute(
             "INSERT INTO LOCATION (guild_id, member_id, location) values ($1, $2, $3)",
-            &[
-                &U64::new(guild_id),
-                &U64::new(member_id),
-                resolved_location,
-            ],
+            &[&U64::new(guild_id), &U64::new(member_id), resolved_location],
         )
         .await
         .expect("Insert failed");

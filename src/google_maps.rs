@@ -1,7 +1,7 @@
 use google_maps::prelude::ClientSettings;
 use google_maps::Region;
-use tokio_compat_02::FutureExt;
 use std::env;
+use tokio_compat_02::FutureExt;
 
 pub async fn sync_resolve_location(location: &str) -> String {
     let client =
