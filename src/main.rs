@@ -1,11 +1,10 @@
-use log::{set_max_level, LevelFilter};
 use crate::client_holder::read_client;
 use crate::client_holder::ClientHolder;
+use crate::db::connect_to_postgres;
 use crate::db::{Location, U64};
 use crate::google_maps::sync_resolve_location;
 use dotenv::dotenv;
-use native_tls::TlsConnector;
-use postgres_native_tls::MakeTlsConnector;
+use log::{set_max_level, LevelFilter};
 use serenity::async_trait;
 use serenity::client::{Client, Context, EventHandler};
 use serenity::framework::standard::{
@@ -31,27 +30,6 @@ struct General;
 
 #[async_trait]
 impl EventHandler for Handler {}
-
-async fn connect_to_postgres() -> Result<tokio_postgres::Client, Box<dyn std::error::Error>> {
-    let database_url = &env::var("DATABASE_URL").expect("database_url");
-
-    let na = TlsConnector::builder()
-        .danger_accept_invalid_certs(true)
-        .build()?;
-    let connector = MakeTlsConnector::new(na);
-
-    let (client, connection) = tokio_postgres::connect(database_url, connector).await?;
-
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        }
-    });
-
-    println!("Sanity check: {:?}", client.execute("SELECT 1", &[]).await?);
-
-    Ok(client)
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -98,7 +76,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let member_id = msg.author.id.0;
 
     if exists_by(&client, guild_id, member_id).await {
-        update_existing(&*client, guild_id, member_id, &resolved_location).await;
+        update_existing(&client, guild_id, member_id, &resolved_location).await;
     } else {
         insert_new(&client, guild_id, member_id, &resolved_location).await;
     }
