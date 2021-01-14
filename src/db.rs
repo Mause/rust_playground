@@ -2,7 +2,6 @@ use bytes::{Buf, BufMut, BytesMut};
 use deadpool_postgres::config::SslMode;
 use deadpool_postgres::tokio_postgres;
 use deadpool_postgres::{Config, Pool};
-use log::warn;
 use native_tls::TlsConnector;
 use postgres_native_tls::MakeTlsConnector;
 use std::env;
@@ -32,16 +31,12 @@ fn convert_config(main_config: tokio_postgres::Config) -> Config {
 pub async fn connect_to_postgres() -> Result<Pool, Box<dyn std::error::Error>> {
     let database_url = &env::var("DATABASE_URL").expect("database_url");
 
-    warn!("Database url: {}", database_url);
-
     let na = TlsConnector::builder()
         .danger_accept_invalid_certs(true)
         .build()?;
     let connector = MakeTlsConnector::new(na);
 
     let config = convert_config(tokio_postgres::Config::from_str(database_url).unwrap());
-
-    warn!("Config: {:?}", config);
 
     let pool = config.create_pool(connector).unwrap();
 
