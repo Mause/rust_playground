@@ -1,5 +1,6 @@
 use bytes::{Buf, BufMut, BytesMut};
 use deadpool_postgres::config::SslMode;
+use deadpool_postgres::tokio_postgres;
 use deadpool_postgres::{Config, Pool};
 use native_tls::TlsConnector;
 use postgres_native_tls::MakeTlsConnector;

@@ -1,4 +1,4 @@
-use deadpool_postgres::{ClientWrapper, Pool};
+use deadpool_postgres::{tokio_postgres, ClientWrapper, Pool};
 use serenity::client::Context;
 use serenity::prelude::TypeMapKey;
 
