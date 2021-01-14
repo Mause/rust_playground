@@ -1578,7 +1578,6 @@ dependencies = [
  "tokio-compat-02",
  "tokio-pg-mapper",
  "tokio-pg-mapper-derive",
- "tokio-postgres",
  "typemap_rev",
 ]
 

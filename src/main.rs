@@ -15,6 +15,7 @@ use serenity::model::channel::Message;
 use simple_logger::SimpleLogger;
 use std::env;
 use tokio_pg_mapper::FromTokioPostgresRow;
+use deadpool_postgres::tokio_postgres;
 use tokio_postgres::Row;
 
 mod client_holder;
