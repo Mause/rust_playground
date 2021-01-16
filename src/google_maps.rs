@@ -19,7 +19,7 @@ impl Error for SimpleError {
     }
 }
 
-pub async fn sync_resolve_location(
+pub async fn resolve_location(
     location: &str,
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
     let client =
