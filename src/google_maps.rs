@@ -1,9 +1,27 @@
 use google_maps::prelude::ClientSettings;
-use google_maps::Region;
+use google_maps::{PlaceType, Region};
 use std::env;
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 use tokio_compat_02::FutureExt;
 
-pub async fn sync_resolve_location(location: &str) -> String {
+#[derive(Debug, Clone)]
+pub struct SimpleError(pub String);
+unsafe impl Send for SimpleError {}
+impl Display for SimpleError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        self.0.fmt(f)
+    }
+}
+impl Error for SimpleError {
+    fn source(&self) -> std::option::Option<&(dyn std::error::Error + 'static)> {
+        None
+    }
+}
+
+pub async fn sync_resolve_location(
+    location: &str,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
     let client =
         ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
     let res = client
@@ -14,5 +32,15 @@ pub async fn sync_resolve_location(location: &str) -> String {
         .compat()
         .await
         .expect("Geocode call failed");
-    res.results[0].formatted_address.to_string()
+
+    let result = &res.results[0];
+
+    if result.types != [PlaceType::Locality, PlaceType::Political] {
+        Err(Box::new(SimpleError(format!(
+            "Not a suburb: {:?}",
+            result.types
+        ))))
+    } else {
+        Ok(result.formatted_address.to_string())
+    }
 }
