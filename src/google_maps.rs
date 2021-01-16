@@ -1,5 +1,5 @@
 use google_maps::prelude::ClientSettings;
-use google_maps::Region;
+use google_maps::{PlaceType, Region};
 use std::env;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
@@ -18,7 +18,10 @@ impl Error for SimpleError {
         None
     }
 }
-pub async fn sync_resolve_location(location: &str) -> String {
+
+pub async fn sync_resolve_location(
+    location: &str,
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
     let client =
         ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
     let res = client
@@ -29,5 +32,15 @@ pub async fn sync_resolve_location(location: &str) -> String {
         .compat()
         .await
         .expect("Geocode call failed");
-    res.results[0].formatted_address.to_string()
+
+    let result = &res.results[0];
+
+    if result.types != [PlaceType::Locality, PlaceType::Political] {
+        Err(Box::new(SimpleError(format!(
+            "Not a suburb: {:?}",
+            result.types
+        ))))
+    } else {
+        Ok(result.formatted_address.to_string())
+    }
 }
