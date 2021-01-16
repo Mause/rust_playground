@@ -1,7 +1,5 @@
-use crate::client_holder::read_client;
-use crate::client_holder::ClientHolder;
-use crate::db::connect_to_postgres;
-use crate::db::{Location, U64};
+use crate::client_holder::{read_client, ClientHolder};
+use crate::db::{connect_to_postgres, Location, U64};
 use crate::google_maps::resolve_location;
 use deadpool_postgres::tokio_postgres;
 use dotenv::dotenv;
