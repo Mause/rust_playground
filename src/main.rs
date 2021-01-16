@@ -3,8 +3,9 @@ use crate::client_holder::ClientHolder;
 use crate::db::connect_to_postgres;
 use crate::db::{Location, U64};
 use crate::google_maps::sync_resolve_location;
+use deadpool_postgres::tokio_postgres;
 use dotenv::dotenv;
-use log::{set_max_level, LevelFilter};
+use log::{info, set_max_level, LevelFilter};
 use serenity::async_trait;
 use serenity::client::{Client, Context, EventHandler};
 use serenity::framework::standard::{
@@ -15,7 +16,6 @@ use serenity::model::channel::Message;
 use simple_logger::SimpleLogger;
 use std::env;
 use tokio_pg_mapper::FromTokioPostgresRow;
-use deadpool_postgres::tokio_postgres;
 use tokio_postgres::Row;
 
 mod client_holder;
@@ -69,26 +69,37 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let location = args.message();
 
-    let resolved_location = sync_resolve_location(location).await;
+    let res: Result<String, Box<dyn std::error::Error + Send + Sync>> =
+        sync_resolve_location(location).await;
 
-    let client = read_client(ctx).await;
+    match res {
+        Err(e) => {
+            msg.reply_mention(ctx, e).await?;
+            Ok(())
+        }
+        Ok(resolved_location) => {
+            info!("Resolved location");
 
-    let guild_id = msg.guild_id.expect("No guild?").0;
-    let member_id = msg.author.id.0;
+            let client = read_client(ctx).await;
 
-    if exists_by(&client, guild_id, member_id).await {
-        update_existing(&client, guild_id, member_id, &resolved_location).await;
-    } else {
-        insert_new(&client, guild_id, member_id, &resolved_location).await;
+            let guild_id = msg.guild_id.expect("No guild?").0;
+            let member_id = msg.author.id.0;
+
+            if exists_by(&client, guild_id, member_id).await {
+                update_existing(&client, guild_id, member_id, &resolved_location).await;
+            } else {
+                insert_new(&client, guild_id, member_id, &resolved_location).await;
+            }
+
+            msg.reply_mention(
+                ctx,
+                format!("Ok, I now have you down living at {}", resolved_location),
+            )
+            .await?;
+
+            Ok(())
+        }
     }
-
-    msg.reply_mention(
-        ctx,
-        format!("Ok, I now have you down living at {}", resolved_location),
-    )
-    .await?;
-
-    Ok(())
 }
 
 async fn update_existing(
