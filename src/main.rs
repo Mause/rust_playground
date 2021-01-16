@@ -2,7 +2,7 @@ use crate::client_holder::read_client;
 use crate::client_holder::ClientHolder;
 use crate::db::connect_to_postgres;
 use crate::db::{Location, U64};
-use crate::google_maps::sync_resolve_location;
+use crate::google_maps::resolve_location;
 use deadpool_postgres::tokio_postgres;
 use dotenv::dotenv;
 use log::{info, set_max_level, LevelFilter};
@@ -69,8 +69,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let location = args.message();
 
-    let res: Result<String, Box<dyn std::error::Error + Send + Sync>> =
-        sync_resolve_location(location).await;
+    let res = resolve_location(location).await;
 
     match res {
         Err(e) => {
