@@ -1,4 +1,4 @@
-use crate::proxy::Proxy;
+use crate::proxy::{Proxy, Mock};
 use log::{set_max_level, LevelFilter};
 use serenity::client::bridge::gateway::ShardMessenger;
 use serenity::client::Cache;
@@ -51,6 +51,11 @@ fn it_works() {
 
     println!("Starting proxy");
     let mut proxy = Proxy::new();
+
+    let mut m = Mock::new("POST", "/api/v8/channels/0/messages");
+    m.response.body = std::fs::read("src/message.json").unwrap();
+    proxy.register(m);
+
     proxy.start();
     println!("Proxy {}", proxy.url());
 

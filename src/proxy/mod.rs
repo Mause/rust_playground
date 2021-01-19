@@ -1,4 +1,4 @@
-use crate::proxy::mock::{Mock, Response};
+use crate::proxy::mock::{Response};
 use lazy_static::lazy_static;
 use log::{error, info};
 use native_tls::TlsStream;
@@ -11,18 +11,19 @@ use std::thread;
 
 mod identity;
 mod mock;
+pub use crate::proxy::mock::Mock;
 
 lazy_static! {
     pub static ref STATE: Mutex<State> = Mutex::new(State::new());
 }
 const SERVER_ADDRESS_INTERNAL: &str = "127.0.0.1:1234";
 
-pub struct Proxy<'a> {
-    mocks: Vec<&'a mockito::Mock>,
+pub struct Proxy {
+    mocks: Vec<Mock>,
     listening_addr: Option<SocketAddr>,
 }
 
-impl<'a> Default for Proxy<'a> {
+impl Default for Proxy {
     fn default() -> Self {
         Self {
             mocks: Vec::new(),
@@ -31,12 +32,12 @@ impl<'a> Default for Proxy<'a> {
     }
 }
 
-impl<'a> Proxy<'a> {
+impl Proxy {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn register(&mut self, mock: &'a mockito::Mock) {
+    pub fn register(&mut self, mock: Mock) {
         self.mocks.push(mock);
     }
 
@@ -294,11 +295,14 @@ fn handle_request(
     println!("{:?} {:?}", result, req);
 
     let mut m = Mock::new("POST", "/api/v8/channels/0/messages");
-
     m.response.body = std::fs::read("src/message.json").unwrap();
+    let mocks = vec![m];
 
-    if m.path == req.path.unwrap() && m.method == req.method.unwrap() {
-        write_response(&mut tstream, req, m.response)?;
+    for m in mocks {
+        if m.matches(&req) {
+            write_response(&mut tstream, req, m.response)?;
+            break;
+        }
     }
 
     Ok(())
