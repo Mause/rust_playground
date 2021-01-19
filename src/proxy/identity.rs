@@ -1,9 +1,12 @@
 use openssl::asn1::{Asn1Integer, Asn1Time};
-use openssl::x509::{X509NameBuilder, X509};
 use openssl::pkey::{PKey, Private};
 use openssl::rsa::Rsa;
+use openssl::x509::{X509NameBuilder, X509};
 
-pub fn generateX509(subject_name: &str, days_valid: u32) -> Result<(X509, PKey<Private>), Box<dyn std::error::Error>> {
+pub fn generateX509(
+    subject_name: &str,
+    days_valid: u32,
+) -> Result<(X509, PKey<Private>), Box<dyn std::error::Error>> {
     let rsa = Rsa::generate(4096)?;
 
     let mut cert = X509::builder()?;

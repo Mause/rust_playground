@@ -1,4 +1,4 @@
-use crate::proxy::{start_proxy, url, get_certificate};
+use crate::proxy::{get_certificate, start_proxy, url};
 use log::{set_max_level, LevelFilter};
 use reqwest::Proxy;
 use serenity::client::bridge::gateway::ShardMessenger;
@@ -24,8 +24,7 @@ fn build_context(base: String) -> Context {
 
     println!("{:?}", &proxy);
 
-    let certificate =
-        reqwest::Certificate::from_pem(&get_certificate()).unwrap();
+    let certificate = reqwest::Certificate::from_pem(&get_certificate()).unwrap();
 
     let http = Arc::new(
         reqwest::ClientBuilder::new()
