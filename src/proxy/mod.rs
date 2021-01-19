@@ -1,4 +1,4 @@
-use crate::proxy::mock::Mock;
+use crate::proxy::mock::{Mock, Response};
 use lazy_static::lazy_static;
 use log::{error, info};
 use native_tls::TlsStream;
@@ -298,18 +298,28 @@ fn handle_request(
     m.response.body = std::fs::read("src/message.json").unwrap();
 
     if m.path == req.path.unwrap() && m.method == req.method.unwrap() {
-        tstream.write_fmt(format_args!(
-            "HTTP/1.{} {}\r\n",
-            req.version.expect("version"),
-            m.response.status
-        ))?;
-        for (header, value) in m.response.headers {
-            tstream.write_fmt(format_args!("{}: {}\r\n", header, value))?;
-        }
-        tstream.write(b"\r\n")?;
-        tstream.write_all(&m.response.body)?;
-        tstream.write(b"\r\n")?;
+        write_response(&mut tstream, req, m.response)?;
     }
+
+    Ok(())
+}
+
+fn write_response(
+    tstream: &mut TlsStream<&mut TcpStream>,
+    request: httparse::Request,
+    response: Response,
+) -> Result<(), Box<dyn std::error::Error>> {
+    tstream.write_fmt(format_args!(
+        "HTTP/1.{} {}\r\n",
+        request.version.expect("version"),
+        response.status
+    ))?;
+    for (header, value) in response.headers {
+        tstream.write_fmt(format_args!("{}: {}\r\n", header, value))?;
+    }
+    tstream.write(b"\r\n")?;
+    tstream.write_all(&response.body)?;
+    tstream.write(b"\r\n")?;
 
     Ok(())
 }
