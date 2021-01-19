@@ -50,7 +50,8 @@ fn it_works() {
     set_max_level(LevelFilter::Trace);
 
     println!("Starting proxy");
-    let mut proxy = start_proxy();
+    let mut proxy = Proxy::new();
+    start_proxy(&mut proxy);
     println!("Proxy {}", proxy.url());
 
     let context = build_context(&proxy);

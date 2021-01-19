@@ -20,10 +20,18 @@ const SERVER_ADDRESS_INTERNAL: &str = "127.0.0.1:1234";
 
 pub struct Proxy<'a> {
     mocks: Vec<&'a mockito::Mock>,
+    listening_addr: Option<SocketAddr>,
 }
+
+impl <'a> Default for Proxy<'a> {
+    fn default() -> Self {
+        Self { mocks: Vec::new(), listening_addr: None }
+    }
+}
+
 impl<'a> Proxy<'a> {
-    fn new() -> Self {
-        Self { mocks: Vec::new() }
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn register(&mut self, mock: &'a mockito::Mock) {
@@ -169,7 +177,7 @@ fn create_identity() -> (openssl::x509::X509, native_tls::Identity) {
     )
 }
 
-pub fn start_proxy<'a>() -> Proxy<'a> {
+pub fn start_proxy<'a>(proxy: &mut Proxy) {
     let mut state = STATE.lock().unwrap();
 
     // if state.listening_addr.is_some() {
@@ -218,8 +226,7 @@ pub fn start_proxy<'a>() -> Proxy<'a> {
     });
 
     state.listening_addr = rx.recv().ok().and_then(|addr| addr);
-
-    Proxy::new()
+    proxy.listening_addr = state.listening_addr.clone();
 }
 
 fn handle_request(
