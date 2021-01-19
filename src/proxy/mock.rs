@@ -27,4 +27,8 @@ impl Mock {
             response: Response::default(),
         }
     }
+
+    pub fn matches(&self, request: &httparse::Request) -> bool {
+        self.path == request.path.unwrap() && self.method == request.method.unwrap()
+    }
 }
