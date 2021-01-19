@@ -1,11 +1,10 @@
 use crate::proxy::mock::Mock;
 use lazy_static::lazy_static;
 use log::{error, info};
+use native_tls::TlsStream;
 use std::fmt::Write;
 use std::io::{Read, Write as IOWrite};
-use std::net::SocketAddr;
-use std::net::TcpListener;
-use std::net::TcpStream;
+use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::sync::mpsc;
 use std::sync::Mutex;
 use std::thread;
@@ -23,9 +22,12 @@ pub struct Proxy<'a> {
     listening_addr: Option<SocketAddr>,
 }
 
-impl <'a> Default for Proxy<'a> {
+impl<'a> Default for Proxy<'a> {
     fn default() -> Self {
-        Self { mocks: Vec::new(), listening_addr: None }
+        Self {
+            mocks: Vec::new(),
+            listening_addr: None,
+        }
     }
 }
 
@@ -233,10 +235,10 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
     proxy.listening_addr = state.listening_addr.clone();
 }
 
-fn handle_request(
+fn open_tunnel(
     request: Request,
-    mut stream: TcpStream,
-) -> Result<(), Box<dyn std::error::Error>> {
+    stream: &mut TcpStream,
+) -> Result<TlsStream<&mut TcpStream>, Box<dyn std::error::Error>> {
     let version = request.version;
     let status = 200;
 
@@ -252,12 +254,21 @@ fn handle_request(
     let identity = STATE.lock().unwrap().identity.clone();
 
     info!("Wrapping with tls");
-    let mut tstream = native_tls::TlsAcceptor::builder(identity)
+    let tstream = native_tls::TlsAcceptor::builder(identity)
         .build()
         .expect("Unable to build acceptor")
         .accept(stream)
         .expect("Unable to accept connection");
     info!("Wrapped: {:?}", tstream);
+
+    Ok(tstream)
+}
+
+fn handle_request(
+    request: Request,
+    mut stream: TcpStream,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut tstream = open_tunnel(request, &mut stream)?;
 
     let mut all_buf = Vec::new();
     loop {
