@@ -1,4 +1,4 @@
-use crate::proxy::mock::{Response};
+use crate::proxy::mock::Response;
 use lazy_static::lazy_static;
 use log::{error, info};
 use native_tls::TlsStream;
@@ -21,6 +21,7 @@ const SERVER_ADDRESS_INTERNAL: &str = "127.0.0.1:1234";
 pub struct Proxy {
     mocks: Vec<Mock>,
     listening_addr: Option<SocketAddr>,
+    started: bool,
 }
 
 impl Default for Proxy {
@@ -28,6 +29,7 @@ impl Default for Proxy {
         Self {
             mocks: Vec::new(),
             listening_addr: None,
+            started: false,
         }
     }
 }
@@ -38,6 +40,9 @@ impl Proxy {
     }
 
     pub fn register(&mut self, mock: Mock) {
+        if (self.started) {
+            panic!("Cannot add mocks to a started proxy");
+        }
         self.mocks.push(mock);
     }
 
@@ -187,6 +192,12 @@ fn create_identity() -> (openssl::x509::X509, native_tls::Identity) {
 fn start_proxy<'a>(proxy: &mut Proxy) {
     let mut state = STATE.lock().unwrap();
 
+    if proxy.started {
+        panic!("Tried to start an already started proxy");
+    }
+    proxy.started = true;
+    let mocks = proxy.mocks.clone();
+
     // if state.listening_addr.is_some() {
     //     return;
     // }
@@ -218,7 +229,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
                 let request = Request::from(&stream);
                 info!("Request received: {}", request);
                 if request.is_ok() {
-                    handle_request(request, stream).unwrap();
+                    handle_request(&mocks, request, stream).unwrap();
                 } else {
                     let message = request
                         .error()
@@ -266,6 +277,7 @@ fn open_tunnel(
 }
 
 fn handle_request(
+    mocks: &Vec<Mock>,
     request: Request,
     mut stream: TcpStream,
 ) -> Result<(), Box<dyn std::error::Error>> {
@@ -294,13 +306,9 @@ fn handle_request(
     let result = req.parse(&all_buf).unwrap();
     println!("{:?} {:?}", result, req);
 
-    let mut m = Mock::new("POST", "/api/v8/channels/0/messages");
-    m.response.body = std::fs::read("src/message.json").unwrap();
-    let mocks = vec![m];
-
     for m in mocks {
         if m.matches(&req) {
-            write_response(&mut tstream, req, m.response)?;
+            write_response(&mut tstream, req, &m.response)?;
             break;
         }
     }
@@ -311,14 +319,14 @@ fn handle_request(
 fn write_response(
     tstream: &mut TlsStream<&mut TcpStream>,
     request: httparse::Request,
-    response: Response,
+    response: &Response,
 ) -> Result<(), Box<dyn std::error::Error>> {
     tstream.write_fmt(format_args!(
         "HTTP/1.{} {}\r\n",
         request.version.expect("version"),
         response.status
     ))?;
-    for (header, value) in response.headers {
+    for (header, value) in &response.headers {
         tstream.write_fmt(format_args!("{}: {}\r\n", header, value))?;
     }
     tstream.write(b"\r\n")?;

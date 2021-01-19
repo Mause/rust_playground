@@ -1,5 +1,6 @@
 use http::status::StatusCode;
 
+#[derive(Debug, Clone)]
 pub struct Response {
     pub headers: Vec<(String, String)>,
     pub body: Vec<u8>,
@@ -14,6 +15,7 @@ impl Default for Response {
         }
     }
 }
+#[derive(Debug, Clone)]
 pub struct Mock {
     pub path: String,
     pub method: String,

@@ -1,4 +1,4 @@
-use crate::proxy::{Proxy, Mock};
+use crate::proxy::{Mock, Proxy};
 use log::{set_max_level, LevelFilter};
 use serenity::client::bridge::gateway::ShardMessenger;
 use serenity::client::Cache;
