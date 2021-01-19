@@ -29,24 +29,28 @@ impl<'a> Proxy<'a> {
     pub fn register(&mut self, mock: &'a mockito::Mock) {
         self.mocks.push(mock);
     }
-}
 
-/// Address and port of the local server.
-/// Can be used with `std::net::TcpStream`.
-///
-/// The server will be started if necessary.
-pub fn address() -> SocketAddr {
-    let state = STATE.lock().map(|state| state.listening_addr);
-    state
-        .expect("state lock")
-        .expect("server should be listening")
-}
+    /// Address and port of the local server.
+    /// Can be used with `std::net::TcpStream`.
+    ///
+    /// The server will be started if necessary.
+    pub fn address(&self) -> SocketAddr {
+        let state = STATE.lock().map(|state| state.listening_addr);
+        state
+            .expect("state lock")
+            .expect("server should be listening")
+    }
 
-/// A local `http://…` URL of the server.
-///
-/// The server will be started if necessary.
-pub fn url() -> String {
-    format!("http://{}", address())
+    /// A local `http://…` URL of the server.
+    ///
+    /// The server will be started if necessary.
+    pub fn url(&self) -> String {
+        format!("http://{}", self.address())
+    }
+
+    pub fn get_certificate(&self) -> Vec<u8> {
+        STATE.lock().unwrap().cert.to_pem().unwrap().clone()
+    }
 }
 
 pub struct State {
@@ -64,15 +68,13 @@ impl State {
         }
     }
 }
-pub fn get_certificate() -> Vec<u8> {
-    STATE.lock().unwrap().cert.to_pem().unwrap().clone()
-}
 
 struct Request {
     error: Option<String>,
     host: Option<String>,
     version: (u8, u8),
 }
+
 impl std::fmt::Display for Request {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         f.write_str("Request {")?;
@@ -150,29 +152,13 @@ impl<'a> From<&'a TcpStream> for Request {
 }
 
 fn create_identity() -> (openssl::x509::X509, native_tls::Identity) {
-    use std::fs;
-
-    // openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 \
-    // -keyout example.key -out example.crt -subj "/CN=discord.com" \
-    // -addext "subjectAltName=DNS:discord.com,DNS:api.discord.com"
-    // openssl pkcs12 -inkey example.key -in example.crt -export -out example.pfx
-
     let cn = "discord.com";
 
     let (cert, key) = crate::proxy::identity::generateX509(cn, 5).unwrap();
 
     let password = "password";
     let encrypted = openssl::pkcs12::Pkcs12::builder()
-        .build(
-            password, cn, &key,
-            // &openssl::pkey::PKey::private_key_from_pem_passphrase(
-            //     &fs::read("example.key").unwrap(),
-            //     password.as_bytes(),
-            // )
-            // .unwrap(),
-            &cert,
-            // &openssl::x509::X509::from_pem(&fs::read("example.crt").unwrap()).unwrap(),
-        )
+        .build(password, cn, &key, &cert)
         .unwrap()
         .to_der()
         .unwrap();

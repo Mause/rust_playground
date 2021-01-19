@@ -1,6 +1,5 @@
-use crate::proxy::{get_certificate, start_proxy, url};
+use crate::proxy::{start_proxy, Proxy};
 use log::{set_max_level, LevelFilter};
-use reqwest::Proxy;
 use serenity::client::bridge::gateway::ShardMessenger;
 use serenity::client::Cache;
 use serenity::client::Context;
@@ -16,20 +15,16 @@ use std::io::BufReader;
 use std::sync::Arc;
 use tokio_test::block_on;
 
-fn build_context(base: String) -> Context {
+fn build_context(proxy: &Proxy) -> Context {
     let data = Arc::new(RwLock::new(TypeMap::new()));
     let shard_id = 0;
 
-    let proxy = Proxy::all(&base).unwrap();
-
-    println!("{:?}", &proxy);
-
-    let certificate = reqwest::Certificate::from_pem(&get_certificate()).unwrap();
+    let certificate = reqwest::Certificate::from_pem(&proxy.get_certificate()).unwrap();
 
     let http = Arc::new(
         reqwest::ClientBuilder::new()
             .add_root_certificate(certificate)
-            .proxy(proxy)
+            .proxy(reqwest::Proxy::all(&proxy.url()).unwrap())
             .build()
             .unwrap(),
     );
@@ -56,9 +51,9 @@ fn it_works() {
 
     println!("Starting proxy");
     let mut proxy = start_proxy();
-    println!("Proxy {}", url());
+    println!("Proxy {}", proxy.url());
 
-    let context = build_context(url());
+    let context = build_context(&proxy);
 
     let message =
         serde_json::from_reader(BufReader::new(File::open("src/message.json").unwrap())).unwrap();
