@@ -1,4 +1,4 @@
-use crate::proxy::{start_proxy, Proxy};
+use crate::proxy::Proxy;
 use log::{set_max_level, LevelFilter};
 use serenity::client::bridge::gateway::ShardMessenger;
 use serenity::client::Cache;
@@ -51,7 +51,7 @@ fn it_works() {
 
     println!("Starting proxy");
     let mut proxy = Proxy::new();
-    start_proxy(&mut proxy);
+    proxy.start();
     println!("Proxy {}", proxy.url());
 
     let context = build_context(&proxy);

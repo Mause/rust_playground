@@ -38,6 +38,10 @@ impl<'a> Proxy<'a> {
         self.mocks.push(mock);
     }
 
+    pub fn start(&mut self) {
+        start_proxy(self);
+    }
+
     /// Address and port of the local server.
     /// Can be used with `std::net::TcpStream`.
     ///
@@ -177,7 +181,7 @@ fn create_identity() -> (openssl::x509::X509, native_tls::Identity) {
     )
 }
 
-pub fn start_proxy<'a>(proxy: &mut Proxy) {
+fn start_proxy<'a>(proxy: &mut Proxy) {
     let mut state = STATE.lock().unwrap();
 
     // if state.listening_addr.is_some() {
