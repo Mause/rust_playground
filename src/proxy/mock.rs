@@ -36,6 +36,17 @@ impl Mock {
         Ok(self)
     }
 
+    pub fn with_body_from_json<T>(
+        &mut self,
+        value: T,
+    ) -> Result<&mut Self, Box<dyn std::error::Error>>
+    where
+        T: Into<json::JsonValue>,
+    {
+        self.response.body = json::stringify_pretty(value, 2).as_bytes().to_vec();
+        Ok(self)
+    }
+
     pub fn create(&self) -> Self {
         self.clone()
     }
