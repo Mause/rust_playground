@@ -7,11 +7,9 @@ use serenity::framework::standard::Args;
 use serenity::futures::channel::mpsc::unbounded;
 use serenity::gateway::InterMessage;
 use serenity::http::Http;
-use serenity::prelude::RwLock;
-use serenity::prelude::TypeMap;
+use serenity::model::prelude::*;
+use serenity::prelude::*;
 use simple_logger::SimpleLogger;
-use std::fs::File;
-use std::io::BufReader;
 use std::sync::Arc;
 use tokio_test::block_on;
 
@@ -44,12 +42,35 @@ fn build_context(proxy: &Proxy) -> Context {
     context
 }
 
+fn build_message() -> Message {
+    let obj = json::object! {
+        "id": 0,
+        "attachments": [],
+        "content": "",
+        "channel_id": 0,
+        "embeds": [],
+        "type": 1,
+        "timestamp":  "2015-12-31T12:00:00.000Z",
+        "tts": false,
+        "pinned": false,
+        "mention_everyone": false,
+        "mention_roles": [],
+        "mentions": [],
+        "author": {
+            "id": 0,
+            "discriminator": 0,
+            "username": "Mause"
+        }
+    };
+
+    serde_json::from_str(&json::stringify(obj)).unwrap()
+}
+
 #[test]
 fn it_works() {
     SimpleLogger::new().init().unwrap();
     set_max_level(LevelFilter::Trace);
 
-    println!("Starting proxy");
     let mut proxy = Proxy::new();
 
     proxy.register(
@@ -68,14 +89,12 @@ fn it_works() {
     );
 
     proxy.start();
-    println!("Proxy {}", proxy.url());
 
     let context = build_context(&proxy);
 
-    let message =
-        serde_json::from_reader(BufReader::new(File::open("src/message.json").unwrap())).unwrap();
+    let message = build_message();
 
-    let res = crate::store(&context, &message, Args::new("", &[]));
+    let res = crate::store(&context, &message, Args::new("Victoria Park", &[]));
 
     let ares = block_on(res).unwrap();
 
