@@ -52,8 +52,10 @@ fn it_works() {
     println!("Starting proxy");
     let mut proxy = Proxy::new();
 
-    let mut m = Mock::new("POST", "/api/v8/channels/0/messages");
-    m.response.body = std::fs::read("src/message.json").unwrap();
+    let mut m = Mock::new("POST", "/api/v8/channels/0/messages")
+        .with_body_from_file("src/message.json")
+        .unwrap()
+        .create();
     proxy.register(m);
 
     proxy.start();

@@ -31,6 +31,15 @@ impl Mock {
         }
     }
 
+    pub fn with_body_from_file(&mut self, filename: &str) -> Result<&mut Self, Box<dyn std::error::Error>> {
+        self.response.body = std::fs::read(filename)?;
+        Ok(self)
+    }
+
+    pub fn create(&self) -> Self {
+        self.clone()
+    }
+
     pub fn matches(&self, request: &Request) -> bool {
         &self.path == request.path.as_ref().unwrap() && &self.method == request.method.as_ref().unwrap()
     }
