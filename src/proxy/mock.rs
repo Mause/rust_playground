@@ -1,4 +1,5 @@
 use http::status::StatusCode;
+use crate::proxy::Request;
 
 #[derive(Debug, Clone)]
 pub struct Response {
@@ -30,7 +31,7 @@ impl Mock {
         }
     }
 
-    pub fn matches(&self, request: &httparse::Request) -> bool {
-        self.path == request.path.unwrap() && self.method == request.method.unwrap()
+    pub fn matches(&self, request: &Request) -> bool {
+        &self.path == request.path.as_ref().unwrap() && &self.method == request.method.as_ref().unwrap()
     }
 }

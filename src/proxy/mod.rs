@@ -89,9 +89,12 @@ impl State {
     }
 }
 
+#[derive(Debug)]
 struct Request {
     error: Option<String>,
     host: Option<String>,
+    path: Option<String>,
+    method: Option<String>,
     version: (u8, u8),
 }
 
@@ -115,12 +118,12 @@ impl Request {
     fn error(&self) -> Option<&String> {
         self.error.as_ref()
     }
-}
 
-impl<'a> From<&'a TcpStream> for Request {
-    fn from(mut stream: &TcpStream) -> Self {
+    fn from(mut stream: Box<&mut dyn Read>) -> Self {
         let mut request = Self {
             error: None,
+            path: None,
+            method: None,
             host: None,
             version: (0, 0),
         };
@@ -159,7 +162,8 @@ impl<'a> From<&'a TcpStream> for Request {
             .map(|result| match result {
                 httparse::Status::Complete(head_length) => {
                     println!("Req: {} {:?}", head_length, req);
-                    request.host = req.path.map(|s| s.to_string());
+                    request.method = req.method.map(|s| s.to_string());
+                    request.path = req.path.map(|s| s.to_string());
                     if let Some(a @ 0..=1) = req.version {
                         request.version = (1, a);
                     }
@@ -225,8 +229,8 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
         info!("Server is listening at {}", addr);
         for stream in listener.incoming() {
             info!("Got stream: {:?}", stream);
-            if let Ok(stream) = stream {
-                let request = Request::from(&stream);
+            if let Ok(mut stream) = stream {
+                let request = Request::from(Box::new(&mut stream));
                 info!("Request received: {}", request);
                 if request.is_ok() {
                     handle_request(&mocks, request, stream).unwrap();
@@ -283,32 +287,13 @@ fn handle_request(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut tstream = open_tunnel(request, &mut stream)?;
 
-    let mut all_buf = Vec::new();
-    loop {
-        let mut buf = [0; 1024];
+    let req = Request::from(Box::new(&mut tstream));
 
-        let rlen = match tstream.read(&mut buf) {
-            Err(e) => Err(e.to_string()),
-            Ok(0) => Err("Nothing to read.".into()),
-            Ok(i) => Ok(i),
-        }
-        .unwrap();
-
-        all_buf.extend_from_slice(&buf[..rlen]);
-
-        if rlen < 1024 {
-            break;
-        }
-    }
-    let mut headers = [httparse::EMPTY_HEADER; 16];
-    let mut req = httparse::Request::new(&mut headers);
-
-    let result = req.parse(&all_buf).unwrap();
-    println!("{:?} {:?}", result, req);
+    println!("{:?}", req);
 
     for m in mocks {
         if m.matches(&req) {
-            write_response(&mut tstream, req, &m.response)?;
+            write_response(&mut tstream, &req, &m.response)?;
             break;
         }
     }
@@ -318,12 +303,12 @@ fn handle_request(
 
 fn write_response(
     tstream: &mut TlsStream<&mut TcpStream>,
-    request: httparse::Request,
+    request: &Request,
     response: &Response,
 ) -> Result<(), Box<dyn std::error::Error>> {
     tstream.write_fmt(format_args!(
         "HTTP/1.{} {}\r\n",
-        request.version.expect("version"),
+        request.version.1,
         response.status
     ))?;
     for (header, value) in &response.headers {
