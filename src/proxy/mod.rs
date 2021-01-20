@@ -40,7 +40,7 @@ impl Proxy {
     }
 
     pub fn register(&mut self, mock: Mock) {
-        if (self.started) {
+        if self.started {
             panic!("Cannot add mocks to a started proxy");
         }
         self.mocks.push(mock);
@@ -161,7 +161,6 @@ impl Request {
             })
             .map(|result| match result {
                 httparse::Status::Complete(head_length) => {
-                    println!("Req: {} {:?}", head_length, req);
                     request.method = req.method.map(|s| s.to_string());
                     request.path = req.path.map(|s| s.to_string());
                     if let Some(a @ 0..=1) = req.version {
@@ -210,7 +209,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
 
     thread::spawn(move || {
         let res = TcpListener::bind(SERVER_ADDRESS_INTERNAL).or_else(|err| {
-            println!("TcpListener::bind: {}", err);
+            error!("TcpListener::bind: {}", err);
             TcpListener::bind("127.0.0.1:0")
         });
         let (listener, addr) = match res {
@@ -220,7 +219,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
                 (listener, addr)
             }
             Err(err) => {
-                println!("alt bind: {}", err);
+                error!("alt bind: {}", err);
                 tx.send(None).unwrap();
                 return;
             }
@@ -288,8 +287,6 @@ fn handle_request(
     let mut tstream = open_tunnel(request, &mut stream)?;
 
     let req = Request::from(Box::new(&mut tstream));
-
-    println!("{:?}", req);
 
     for m in mocks {
         if m.matches(&req) {
