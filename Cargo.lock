@@ -1702,7 +1702,6 @@ dependencies = [
  "http",
  "httparse",
  "json",
- "lazy_static",
  "log",
  "mockito",
  "native-tls",

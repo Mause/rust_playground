@@ -1,5 +1,5 @@
-use http::status::StatusCode;
 use crate::proxy::Request;
+use http::status::StatusCode;
 
 #[derive(Debug, Clone)]
 pub struct Response {
@@ -31,7 +31,10 @@ impl Mock {
         }
     }
 
-    pub fn with_body_from_file(&mut self, filename: &str) -> Result<&mut Self, Box<dyn std::error::Error>> {
+    pub fn with_body_from_file(
+        &mut self,
+        filename: &str,
+    ) -> Result<&mut Self, Box<dyn std::error::Error>> {
         self.response.body = std::fs::read(filename)?;
         Ok(self)
     }
@@ -52,6 +55,7 @@ impl Mock {
     }
 
     pub fn matches(&self, request: &Request) -> bool {
-        &self.path == request.path.as_ref().unwrap() && &self.method == request.method.as_ref().unwrap()
+        &self.path == request.path.as_ref().unwrap()
+            && &self.method == request.method.as_ref().unwrap()
     }
 }
