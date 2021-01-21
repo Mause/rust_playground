@@ -22,14 +22,19 @@ pub struct Proxy {
     mocks: Vec<Mock>,
     listening_addr: Option<SocketAddr>,
     started: bool,
+    identity: native_tls::Identity,
+    cert: openssl::x509::X509,
 }
 
 impl Default for Proxy {
     fn default() -> Self {
+        let (cert, identity) = create_identity();
         Self {
             mocks: Vec::new(),
             listening_addr: None,
             started: false,
+            identity,
+            cert,
         }
     }
 }
@@ -69,22 +74,17 @@ impl Proxy {
     }
 
     pub fn get_certificate(&self) -> Vec<u8> {
-        STATE.lock().unwrap().cert.to_pem().unwrap().clone()
+        self.cert.to_pem().unwrap().clone()
     }
 }
 
 pub struct State {
     listening_addr: Option<SocketAddr>,
-    identity: native_tls::Identity,
-    cert: openssl::x509::X509,
 }
 impl State {
     fn new() -> Self {
-        let (cert, identity) = create_identity();
         Self {
             listening_addr: None,
-            identity: identity,
-            cert: cert,
         }
     }
 }
@@ -200,6 +200,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
     }
     proxy.started = true;
     let mocks = proxy.mocks.clone();
+    let identity = proxy.identity.clone();
 
     // if state.listening_addr.is_some() {
     //     return;
@@ -232,7 +233,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
                 let request = Request::from(Box::new(&mut stream));
                 info!("Request received: {}", request);
                 if request.is_ok() {
-                    handle_request(&mocks, request, stream).unwrap();
+                    handle_request(&identity, &mocks, request, stream).unwrap();
                 } else {
                     let message = request
                         .error()
@@ -250,10 +251,11 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
     proxy.listening_addr = state.listening_addr.clone();
 }
 
-fn open_tunnel(
+fn open_tunnel<'a>(
+    identity: &native_tls::Identity,
     request: Request,
-    stream: &mut TcpStream,
-) -> Result<TlsStream<&mut TcpStream>, Box<dyn std::error::Error>> {
+    stream: &'a mut TcpStream,
+) -> Result<TlsStream<&'a mut TcpStream>, Box<dyn std::error::Error>> {
     let version = request.version;
     let status = 200;
 
@@ -266,10 +268,8 @@ fn open_tunnel(
     stream.flush()?;
     info!("Response written");
 
-    let identity = STATE.lock().unwrap().identity.clone();
-
     info!("Wrapping with tls");
-    let tstream = native_tls::TlsAcceptor::builder(identity)
+    let tstream = native_tls::TlsAcceptor::builder(identity.clone())
         .build()
         .expect("Unable to build acceptor")
         .accept(stream)
@@ -280,11 +280,12 @@ fn open_tunnel(
 }
 
 fn handle_request(
+    identity: &native_tls::Identity,
     mocks: &Vec<Mock>,
     request: Request,
     mut stream: TcpStream,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut tstream = open_tunnel(request, &mut stream)?;
+    let mut tstream = open_tunnel(identity, request, &mut stream)?;
 
     let req = Request::from(Box::new(&mut tstream));
 
@@ -305,8 +306,7 @@ fn write_response(
 ) -> Result<(), Box<dyn std::error::Error>> {
     tstream.write_fmt(format_args!(
         "HTTP/1.{} {}\r\n",
-        request.version.1,
-        response.status
+        request.version.1, response.status
     ))?;
     for (header, value) in &response.headers {
         tstream.write_fmt(format_args!("{}: {}\r\n", header, value))?;
