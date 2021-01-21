@@ -1,0 +1,19 @@
+{
+    "id": 0,
+    "attachments": [],
+    "content": "",
+    "channel_id": 0,
+    "embeds": [],
+    "type": 1,
+    "timestamp":  "2015-12-31T12:00:00.000Z",
+    "tts": false,
+    "pinned": false,
+    "mention_everyone": false,
+    "mention_roles": [],
+    "mentions": [],
+    "author": {
+        "id": 0,
+        "discriminator": 0,
+        "username": "Mause"
+    }
+}

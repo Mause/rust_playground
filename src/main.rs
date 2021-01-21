@@ -19,6 +19,9 @@ use tokio_postgres::Row;
 mod client_holder;
 mod db;
 mod google_maps;
+#[cfg(test)]
+mod proxy;
+#[cfg(test)]
 mod test;
 
 struct Handler;
