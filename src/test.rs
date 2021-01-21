@@ -94,7 +94,7 @@ fn it_works() {
 
     let message = build_message();
 
-    let res = crate::store(&context, &message, Args::new("Victoria Park", &[]));
+    let res = crate::store(&context, &message, Args::new("", &[]));
 
     let ares = block_on(res).unwrap();
 
