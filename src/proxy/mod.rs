@@ -1,21 +1,16 @@
 use crate::proxy::mock::Response;
-use lazy_static::lazy_static;
 use log::{error, info};
 use native_tls::TlsStream;
 use std::fmt::Write;
 use std::io::{Read, Write as IOWrite};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::sync::mpsc;
-use std::sync::Mutex;
 use std::thread;
 
 mod identity;
 mod mock;
 pub use crate::proxy::mock::Mock;
 
-lazy_static! {
-    pub static ref STATE: Mutex<State> = Mutex::new(State::new());
-}
 const SERVER_ADDRESS_INTERNAL: &str = "127.0.0.1:1234";
 
 pub struct Proxy {
@@ -60,10 +55,7 @@ impl Proxy {
     ///
     /// The server will be started if necessary.
     pub fn address(&self) -> SocketAddr {
-        let state = STATE.lock().map(|state| state.listening_addr);
-        state
-            .expect("state lock")
-            .expect("server should be listening")
+        self.listening_addr.expect("server should be listening")
     }
 
     /// A local `http://…` URL of the server.
@@ -75,17 +67,6 @@ impl Proxy {
 
     pub fn get_certificate(&self) -> Vec<u8> {
         self.cert.to_pem().unwrap().clone()
-    }
-}
-
-pub struct State {
-    listening_addr: Option<SocketAddr>,
-}
-impl State {
-    fn new() -> Self {
-        Self {
-            listening_addr: None,
-        }
     }
 }
 
@@ -193,8 +174,6 @@ fn create_identity() -> (openssl::x509::X509, native_tls::Identity) {
 }
 
 fn start_proxy<'a>(proxy: &mut Proxy) {
-    let mut state = STATE.lock().unwrap();
-
     if proxy.started {
         panic!("Tried to start an already started proxy");
     }
@@ -247,8 +226,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
         }
     });
 
-    state.listening_addr = rx.recv().ok().and_then(|addr| addr);
-    proxy.listening_addr = state.listening_addr.clone();
+    proxy.listening_addr = rx.recv().ok().and_then(|addr| addr);
 }
 
 fn open_tunnel<'a>(
@@ -318,4 +296,6 @@ fn write_response(
     Ok(())
 }
 
-fn respond_with_error(stream: TcpStream, version: (u8, u8), message: &str) {}
+fn respond_with_error(_stream: TcpStream, _version: (u8, u8), _message: &str) {
+    todo!();
+}
