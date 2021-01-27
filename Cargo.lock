@@ -216,6 +216,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "colored"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3616f750b84d8f0de8a58bda93e08e2a81ad3f523089b05f1dffecab48c6cbd"
+dependencies = [
+ "atty",
+ "lazy_static",
+ "winapi 0.3.9",
+]
+
+[[package]]
 name = "command_attr"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -349,12 +360,6 @@ name = "dotenv"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
-
-[[package]]
-name = "dtoa"
-version = "0.4.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88d7ed2934d741c6b37e33e3832298e8850b53fd2d2bea03873375596c7cea4e"
 
 [[package]]
 name = "either"
@@ -1121,20 +1126,20 @@ dependencies = [
 
 [[package]]
 name = "mockito"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36a0eb7e686b49b02c1cb87c14b8e2a05de0d36c6eee0293653d0a875906d499"
+checksum = "102f0986ade96028c3227fc14fcbbbee0358ca33b3fedc9a400a97a6f5ad4a6e"
 dependencies = [
  "assert-json-diff",
- "colored",
+ "colored 2.0.0",
  "difference",
  "httparse",
  "lazy_static",
  "log",
- "rand 0.7.3",
+ "rand 0.8.1",
  "regex",
  "serde_json",
- "serde_urlencoded 0.6.1",
+ "serde_urlencoded",
 ]
 
 [[package]]
@@ -1624,7 +1629,7 @@ dependencies = [
  "percent-encoding",
  "pin-project-lite 0.2.1",
  "serde",
- "serde_urlencoded 0.7.0",
+ "serde_urlencoded",
  "tokio 0.2.24",
  "tokio-tls",
  "url",
@@ -1662,7 +1667,7 @@ dependencies = [
  "rustls",
  "serde",
  "serde_json",
- "serde_urlencoded 0.7.0",
+ "serde_urlencoded",
  "tokio 1.1.0",
  "tokio-native-tls",
  "tokio-rustls",
@@ -1843,18 +1848,6 @@ dependencies = [
 
 [[package]]
 name = "serde_urlencoded"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ec5d77e2d4c73717816afac02670d5c4f534ea95ed430442cad02e7a6e32c97"
-dependencies = [
- "dtoa",
- "itoa",
- "serde",
- "url",
-]
-
-[[package]]
-name = "serde_urlencoded"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edfa57a7f8d9c1d260a549e7224100f6c43d43f9103e06dd8b4095a9b2b43ce9"
@@ -1936,7 +1929,7 @@ checksum = "cd57f17c093ead1d4a1499dc9acaafdd71240908d64775465543b8d9a9f1d198"
 dependencies = [
  "atty",
  "chrono",
- "colored",
+ "colored 1.9.3",
  "log",
  "winapi 0.3.9",
 ]
