@@ -18,7 +18,6 @@ tokio-pg-mapper-derive = "*"
 tokio-pg-mapper = "*"
 google_maps = { git = "https://github.com/headuck/google_maps" }
 rust_decimal = "*"
-futures-preview = "*"
 log = "*"
 tokio-compat-02 = "*"
 simple_logger = "*"
