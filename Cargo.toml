@@ -25,7 +25,7 @@ deadpool-postgres = "*"
 deadpool = "*"
 
 [dev-dependencies]
-reqwest = "0.11.2"
+reqwest = "0.11.3"
 serde = "*"
 serde_json = "*"
 tokio-test = "*"
