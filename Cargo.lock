@@ -1569,6 +1569,7 @@ dependencies = [
  "postgres-native-tls",
  "reqwest 0.11.3",
  "rust_decimal",
+ "rust_decimal_macros",
  "rustls",
  "serde",
  "serde_json",
@@ -1594,9 +1595,9 @@ dependencies = [
 
 [[package]]
 name = "rust_decimal_macros"
-version = "1.9.0"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0df1b05015b9da4be40f1ac8b6755b9fdb48814c70184018b4f7923891e0845f"
+checksum = "1e57c22158e46bfc2cf146ce1e64ea3314d9d048217d92da3caf11da2054884c"
 dependencies = [
  "quote",
  "rust_decimal",
