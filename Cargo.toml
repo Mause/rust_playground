@@ -17,13 +17,13 @@ bytes = "1"
 tokio-pg-mapper-derive = "*"
 tokio-pg-mapper = "*"
 google_maps = { git = "https://github.com/headuck/google_maps" }
-rust_decimal = "1.13.0"
+rust_decimal = "1.13"
 log = "*"
 tokio-compat-02 = "*"
 simple_logger = "*"
 deadpool-postgres = "*"
 deadpool = "*"
-rust_decimal_macros = "1.13.0"
+rust_decimal_macros = "1.13"
 
 [dev-dependencies]
 reqwest = "0.11.3"
