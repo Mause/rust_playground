@@ -22,10 +22,10 @@ log = "*"
 simple_logger = "*"
 deadpool-postgres = "0.7.0"
 deadpool = "0.7"
-lexical-core = { version = "=0.7.5" }                            # override to version that compiles on nightly
+lexical-core = { version = "=0.7.6" }                            # override to version that compiles on nightly
 
 [dev-dependencies]
-reqwest = "0.11.3"
+reqwest = "0.11.4"
 serde = "*"
 serde_json = "*"
 tokio-test = "*"
