@@ -20,7 +20,7 @@ google_maps = "2"
 rust_decimal = "*"
 log = "*"
 simple_logger = "*"
-deadpool-postgres = "0.7.0"
+deadpool-postgres = "0.9.0"
 deadpool = "0.7"
 lexical-core = { version = "=0.7.6" }                            # override to version that compiles on nightly
 
