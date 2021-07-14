@@ -16,13 +16,13 @@ native-tls = "*"
 bytes = "1"
 tokio-pg-mapper-derive = "*"
 tokio-pg-mapper = "*"
-google_maps = { git = "https://github.com/headuck/google_maps" }
+google_maps = "2"
 rust_decimal = "*"
 log = "*"
-tokio-compat-02 = "*"
 simple_logger = "*"
-deadpool-postgres = "*"
-deadpool = "*"
+deadpool-postgres = "0.7.0"
+deadpool = "0.7"
+lexical-core = { version = "=0.7.5" }                            # override to version that compiles on nightly
 
 [dev-dependencies]
 reqwest = "0.11.3"
