@@ -3,7 +3,6 @@ use google_maps::{PlaceType, Region};
 use std::env;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
-use tokio_compat_02::FutureExt;
 
 #[derive(Debug, Clone)]
 pub struct SimpleError(pub String);
@@ -29,7 +28,6 @@ pub async fn resolve_location(
         .with_address(&location)
         .with_region(Region::Australia)
         .execute()
-        .compat()
         .await
         .expect("Geocode call failed");
 
