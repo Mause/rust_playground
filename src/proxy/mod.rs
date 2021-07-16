@@ -2,7 +2,7 @@ use crate::proxy::mock::Response;
 use log::{error, info};
 use native_tls::TlsStream;
 use openssl::pkey::{PKey, PKeyRef, Private};
-use openssl::x509::{X509Ref, X509};
+use openssl::x509::X509Ref;
 use std::fmt::Write;
 use std::io::{Read, Write as IOWrite};
 use std::net::{SocketAddr, TcpListener, TcpStream};

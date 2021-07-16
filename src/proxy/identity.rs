@@ -1,4 +1,4 @@
-use openssl::asn1::{Asn1Integer, Asn1Time};
+use openssl::asn1::Asn1Time;
 use openssl::bn::{BigNum, MsbOption};
 use openssl::error::ErrorStack;
 use openssl::hash::MessageDigest;
@@ -8,7 +8,7 @@ use openssl::x509::extension::{
     AuthorityKeyIdentifier, BasicConstraints, KeyUsage, SubjectAlternativeName,
     SubjectKeyIdentifier,
 };
-use openssl::x509::{X509NameBuilder, X509Ref, X509Req, X509ReqBuilder, X509VerifyResult, X509};
+use openssl::x509::{X509NameBuilder, X509Ref, X509Req, X509ReqBuilder, X509};
 
 /// Make a CA certificate and private key
 pub fn mk_ca_cert() -> Result<(X509, PKey<Private>), ErrorStack> {
