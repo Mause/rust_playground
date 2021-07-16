@@ -1,6 +1,5 @@
 use google_maps::prelude::ClientSettings;
 use google_maps::{PlaceType, Region};
-use std::env;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
