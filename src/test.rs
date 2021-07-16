@@ -1,4 +1,5 @@
 use crate::proxy::{Mock, Proxy};
+use crate::{ClientSettings, MapsClientHolder};
 use log::{set_max_level, LevelFilter};
 use serenity::client::bridge::gateway::ShardMessenger;
 use serenity::client::Cache;
@@ -14,18 +15,21 @@ use std::sync::Arc;
 use tokio_test::block_on;
 
 fn build_context(proxy: &Proxy) -> Context {
-    let data = Arc::new(RwLock::new(TypeMap::new()));
+    let typemap = TypeMap::new();
+    let maps_client = ClientSettings::new("");
+    typemap.insert::<ClientSettings>(MapsClientHolder { maps_client });
+    let data = Arc::new(RwLock::new(typemap));
+
     let shard_id = 0;
 
     let certificate = reqwest::Certificate::from_pem(&proxy.get_certificate()).unwrap();
 
-    let http = Arc::new(
-        reqwest::ClientBuilder::new()
-            .add_root_certificate(certificate)
-            .proxy(reqwest::Proxy::all(&proxy.url()).unwrap())
-            .build()
-            .unwrap(),
-    );
+    let client = reqwest::ClientBuilder::new()
+        .add_root_certificate(certificate)
+        .proxy(reqwest::Proxy::all(&proxy.url()).unwrap())
+        .build()
+        .unwrap();
+    let http = Arc::new(client.clone());
     let cache = Arc::new(Cache::default());
 
     let (runner_tx, _) = unbounded::<InterMessage>();
