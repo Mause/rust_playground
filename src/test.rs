@@ -15,13 +15,6 @@ use std::sync::Arc;
 use tokio_test::block_on;
 
 fn build_context(proxy: &Proxy) -> Context {
-    let mut typemap = TypeMap::new();
-    let maps_client = ClientSettings::new("");
-    typemap.insert::<MapsClientHolder>(MapsClientHolder { maps_client });
-    let data = Arc::new(RwLock::new(typemap));
-
-    let shard_id = 0;
-
     let certificate = reqwest::Certificate::from_pem(&proxy.get_certificate()).unwrap();
 
     let client = reqwest::ClientBuilder::new()
@@ -29,6 +22,16 @@ fn build_context(proxy: &Proxy) -> Context {
         .proxy(reqwest::Proxy::all(&proxy.url()).unwrap())
         .build()
         .unwrap();
+
+    let mut typemap = TypeMap::new();
+    let maps_client = ClientSettings::new("APIKEY")
+        .with_reqwest_client(client.clone())
+        .finalize();
+    typemap.insert::<MapsClientHolder>(MapsClientHolder { maps_client });
+    let data = Arc::new(RwLock::new(typemap));
+
+    let shard_id = 0;
+
     let http = Arc::new(client.clone());
     let cache = Arc::new(Cache::default());
 
@@ -92,13 +95,17 @@ fn it_works() {
             .create(),
     );
 
+    proxy.register(
+        Mock::new("GET", "/maps/api/geocode/json?key=APIKEY&address=Perth&region=au")
+        .create());
+
     proxy.start();
 
     let context = build_context(&proxy);
 
     let message = build_message();
 
-    let res = crate::store(&context, &message, Args::new("", &[]));
+    let res = crate::store(&context, &message, Args::new("Perth", &[]));
 
     let ares = block_on(res).unwrap();
 
