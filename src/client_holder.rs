@@ -17,7 +17,18 @@ pub struct MapsClientHolder {
 }
 
 impl TypeMapKey for MapsClientHolder {
-    type Value = MapsClientHolder
+    type Value = MapsClientHolder;
+}
+
+
+pub async fn read_maps_client(ctx: &Context) -> ClientSettings {
+    let map_guard = ctx.data.read().await;
+
+    map_guard
+        .get::<MapsClientHolder>()
+        .expect("Missing Client")
+        .maps_client
+        .clone()
 }
 
 pub async fn read_client(ctx: &Context) -> deadpool::managed::Object<Manager> {
