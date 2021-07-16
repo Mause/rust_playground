@@ -1,4 +1,4 @@
-use crate::client_holder::{read_client, ClientHolder};
+use crate::client_holder::{read_client, ClientHolder, MapsClientHolder};
 use crate::db::{connect_to_postgres, Location, U64};
 use crate::google_maps::resolve_location;
 use ::google_maps::prelude::ClientSettings;
@@ -33,10 +33,6 @@ struct General;
 
 #[async_trait]
 impl EventHandler for Handler {}
-
-struct MapsClientHolder {
-    client: ClientSettings,
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
