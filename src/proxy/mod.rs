@@ -36,6 +36,8 @@ impl Default for Proxy {
     }
 }
 
+struct Pair<'a>(&'a X509Ref, &'a PKeyRef<Private>);
+
 impl Proxy {
     pub fn new() -> Self {
         Self::default()
@@ -151,12 +153,8 @@ impl Request {
     }
 }
 
-fn create_identity(
-    cn: &str,
-    parent: &X509Ref,
-    parent_key: &PKeyRef<Private>,
-) -> (openssl::x509::X509, native_tls::Identity) {
-    let (cert, key) = crate::proxy::identity::mk_ca_signed_cert(cn, parent, parent_key).unwrap();
+fn create_identity(cn: &str, pair: Pair) -> native_tls::Identity {
+    let (cert, key) = crate::proxy::identity::mk_ca_signed_cert(cn, pair.0, pair.1).unwrap();
 
     let password = "password";
     let encrypted = openssl::pkcs12::Pkcs12::builder()
@@ -165,10 +163,7 @@ fn create_identity(
         .to_der()
         .unwrap();
 
-    (
-        cert,
-        native_tls::Identity::from_pkcs12(&encrypted, &password).expect("Unable to build identity"),
-    )
+    native_tls::Identity::from_pkcs12(&encrypted, &password).expect("Unable to build identity")
 }
 
 fn start_proxy<'a>(proxy: &mut Proxy) {
@@ -211,7 +206,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
                 let request = Request::from(Box::new(&mut stream));
                 info!("Request received: {}", request);
                 if request.is_ok() {
-                    handle_request((cert.as_ref(), pkey.as_ref()), &mocks, request, stream)
+                    handle_request(Pair(cert.as_ref(), pkey.as_ref()), &mocks, request, stream)
                         .unwrap();
                 } else {
                     let message = request
@@ -230,7 +225,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
 }
 
 fn open_tunnel<'a>(
-    identity: (&X509Ref, &PKeyRef<Private>),
+    identity: Pair,
     request: Request,
     stream: &'a mut TcpStream,
 ) -> Result<TlsStream<&'a mut TcpStream>, Box<dyn std::error::Error>> {
@@ -246,7 +241,7 @@ fn open_tunnel<'a>(
     stream.flush()?;
     info!("Response written");
 
-    let identity = create_identity(&request.path.unwrap(), identity.0, identity.1).1;
+    let identity = create_identity(&request.path.unwrap(), identity);
 
     info!("Wrapping with tls");
     let tstream = native_tls::TlsAcceptor::builder(identity.clone())
@@ -260,7 +255,7 @@ fn open_tunnel<'a>(
 }
 
 fn handle_request(
-    identity: (&X509Ref, &PKeyRef<Private>),
+    identity: Pair,
     mocks: &Vec<Mock>,
     request: Request,
     mut stream: TcpStream,
