@@ -1,6 +1,8 @@
 use crate::proxy::mock::Response;
 use log::{error, info};
 use native_tls::TlsStream;
+use openssl::pkey::{PKey, PKeyRef, Private};
+use openssl::x509::{X509Ref, X509};
 use std::fmt::Write;
 use std::io::{Read, Write as IOWrite};
 use std::net::{SocketAddr, TcpListener, TcpStream};
@@ -17,13 +19,13 @@ pub struct Proxy {
     mocks: Vec<Mock>,
     listening_addr: Option<SocketAddr>,
     started: bool,
-    identity: native_tls::Identity,
+    identity: PKey<Private>,
     cert: openssl::x509::X509,
 }
 
 impl Default for Proxy {
     fn default() -> Self {
-        let (cert, identity) = create_identity();
+        let (cert, identity) = crate::proxy::identity::mk_ca_cert().unwrap();
         Self {
             mocks: Vec::new(),
             listening_addr: None,
@@ -155,10 +157,13 @@ impl Request {
     }
 }
 
-fn create_identity() -> (openssl::x509::X509, native_tls::Identity) {
-    let cn = "discord.com";
-
-    let (cert, key) = crate::proxy::identity::generateX509(cn, 5).unwrap();
+fn create_identity(
+    cn: &str,
+    parent: &X509Ref,
+    parent_key: &PKeyRef<Private>,
+) -> (openssl::x509::X509, native_tls::Identity) {
+    let cn = "mause.me";
+    let (cert, key) = crate::proxy::identity::mk_ca_signed_cert(cn, parent, parent_key).unwrap();
 
     let password = "password";
     let encrypted = openssl::pkcs12::Pkcs12::builder()
@@ -179,7 +184,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
     }
     proxy.started = true;
     let mocks = proxy.mocks.clone();
-    let identity = proxy.identity.clone();
+    let identity = (proxy.cert.clone().as_ref(), proxy.identity.clone().as_ref());
 
     // if state.listening_addr.is_some() {
     //     return;
@@ -212,7 +217,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
                 let request = Request::from(Box::new(&mut stream));
                 info!("Request received: {}", request);
                 if request.is_ok() {
-                    handle_request(&identity, &mocks, request, stream).unwrap();
+                    handle_request(identity, &mocks, request, stream).unwrap();
                 } else {
                     let message = request
                         .error()
@@ -230,7 +235,7 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
 }
 
 fn open_tunnel<'a>(
-    identity: &native_tls::Identity,
+    identity: (&X509Ref, &PKeyRef<Private>),
     request: Request,
     stream: &'a mut TcpStream,
 ) -> Result<TlsStream<&'a mut TcpStream>, Box<dyn std::error::Error>> {
@@ -246,6 +251,8 @@ fn open_tunnel<'a>(
     stream.flush()?;
     info!("Response written");
 
+    let identity = create_identity(&request.host.unwrap(), identity.0, identity.1).1;
+
     info!("Wrapping with tls");
     let tstream = native_tls::TlsAcceptor::builder(identity.clone())
         .build()
@@ -258,7 +265,7 @@ fn open_tunnel<'a>(
 }
 
 fn handle_request(
-    identity: &native_tls::Identity,
+    identity: (&X509Ref, &PKeyRef<Private>),
     mocks: &Vec<Mock>,
     request: Request,
     mut stream: TcpStream,
