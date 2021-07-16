@@ -75,7 +75,6 @@ impl Proxy {
 #[derive(Debug)]
 struct Request {
     error: Option<String>,
-    host: Option<String>,
     path: Option<String>,
     method: Option<String>,
     version: (u8, u8),
@@ -84,12 +83,6 @@ struct Request {
 impl std::fmt::Display for Request {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         f.write_str("Request {")?;
-        match &self.host {
-            Some(e) => {
-                e.fmt(f)?;
-            }
-            None => (),
-        };
         f.write_char('}')?;
         Ok(())
     }
@@ -107,7 +100,6 @@ impl Request {
             error: None,
             path: None,
             method: None,
-            host: None,
             version: (0, 0),
         };
 
@@ -143,9 +135,11 @@ impl Request {
                 request.error = Some(err.to_string());
             })
             .map(|result| match result {
-                httparse::Status::Complete(head_length) => {
+                httparse::Status::Complete(_head_length) => {
                     request.method = req.method.map(|s| s.to_string());
-                    request.path = req.path.map(|s| s.to_string());
+                    request.path = req
+                        .path
+                        .map(|s| s.to_string().split(":").next().unwrap().to_owned());
                     if let Some(a @ 0..=1) = req.version {
                         request.version = (1, a);
                     }
@@ -251,7 +245,7 @@ fn open_tunnel<'a>(
     stream.flush()?;
     info!("Response written");
 
-    let identity = create_identity(&request.host.unwrap(), identity.0, identity.1).1;
+    let identity = create_identity(&request.path.unwrap(), identity.0, identity.1).1;
 
     info!("Wrapping with tls");
     let tstream = native_tls::TlsAcceptor::builder(identity.clone())
