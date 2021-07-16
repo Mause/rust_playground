@@ -1,4 +1,4 @@
-use crate::proxy::mock::Response;
+use crate::mock::Response;
 use log::{error, info};
 use native_tls::TlsStream;
 use openssl::pkey::{PKey, PKeyRef, Private};
@@ -11,7 +11,7 @@ use std::thread;
 
 mod identity;
 mod mock;
-pub use crate::proxy::mock::Mock;
+pub use crate::mock::Mock;
 
 const SERVER_ADDRESS_INTERNAL: &str = "127.0.0.1:1234";
 
@@ -25,7 +25,7 @@ pub struct Proxy {
 
 impl Default for Proxy {
     fn default() -> Self {
-        let (cert, identity) = crate::proxy::identity::mk_ca_cert().unwrap();
+        let (cert, identity) = crate::identity::mk_ca_cert().unwrap();
         Self {
             mocks: Vec::new(),
             listening_addr: None,
@@ -154,7 +154,7 @@ impl Request {
 }
 
 fn create_identity(cn: &str, pair: Pair) -> native_tls::Identity {
-    let (cert, key) = crate::proxy::identity::mk_ca_signed_cert(cn, pair.0, pair.1).unwrap();
+    let (cert, key) = crate::identity::mk_ca_signed_cert(cn, pair.0, pair.1).unwrap();
 
     let password = "password";
     let encrypted = openssl::pkcs12::Pkcs12::builder()

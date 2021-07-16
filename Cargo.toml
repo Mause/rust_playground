@@ -34,3 +34,4 @@ httparse = "*"
 openssl = "*"
 http = "*"
 json = "*"
+mock_proxy = {path = "./mock_proxy"}
