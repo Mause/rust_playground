@@ -2,6 +2,7 @@ use deadpool_postgres::Manager;
 use deadpool_postgres::Pool;
 use serenity::client::Context;
 use serenity::prelude::TypeMapKey;
+use ::google_maps::prelude::ClientSettings;
 
 pub struct ClientHolder {
     pub client: Pool,
@@ -9,6 +10,14 @@ pub struct ClientHolder {
 
 impl TypeMapKey for ClientHolder {
     type Value = ClientHolder;
+}
+
+pub struct MapsClientHolder {
+    pub maps_client: ClientSettings
+}
+
+impl TypeMapKey for MapsClientHolder {
+    type Value = MapsClientHolder
 }
 
 pub async fn read_client(ctx: &Context) -> deadpool::managed::Object<Manager> {
