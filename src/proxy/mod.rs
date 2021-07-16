@@ -178,7 +178,8 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
     }
     proxy.started = true;
     let mocks = proxy.mocks.clone();
-    let identity = (proxy.cert.clone().as_ref(), proxy.identity.clone().as_ref());
+    let cert = proxy.cert.clone();
+    let pkey = proxy.identity.clone();
 
     // if state.listening_addr.is_some() {
     //     return;
@@ -211,7 +212,8 @@ fn start_proxy<'a>(proxy: &mut Proxy) {
                 let request = Request::from(Box::new(&mut stream));
                 info!("Request received: {}", request);
                 if request.is_ok() {
-                    handle_request(identity, &mocks, request, stream).unwrap();
+                    handle_request((cert.as_ref(), pkey.as_ref()), &mocks, request, stream)
+                        .unwrap();
                 } else {
                     let message = request
                         .error()
