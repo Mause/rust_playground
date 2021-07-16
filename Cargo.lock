@@ -527,9 +527,8 @@ dependencies = [
 
 [[package]]
 name = "google_maps"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a90b1e92450d3a7137ad941f1d765a8a22e6eecbe724a8f114d127f91ebcc50"
+version = "2.0.1"
+source = "git+https://github.com/leontoeides/google_maps#902763c29e134684bddb24c440e20428dcee876a"
 dependencies = [
  "chrono",
  "chrono-tz",

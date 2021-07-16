@@ -1,4 +1,4 @@
-use crate::client_holder::{read_client, ClientHolder};
+use crate::client_holder::{read_client, read_maps_client, ClientHolder, MapsClientHolder};
 use crate::db::{connect_to_postgres, Location, U64};
 use crate::google_maps::resolve_location;
 use ::google_maps::prelude::ClientSettings;
@@ -46,10 +46,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = connect_to_postgres().await?;
 
+    let maps_client =
+        ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
+
     let token = env::var("BOT_TOKEN").expect("token");
     let mut client = Client::builder(token)
         .event_handler(Handler)
         .type_map_insert::<ClientHolder>(ClientHolder { client })
+        .type_map_insert::<MapsClientHolder>(MapsClientHolder { maps_client })
         .framework(framework)
         .await
         .expect("Error creating client");
@@ -71,8 +75,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let location = args.message();
 
-    let client =
-        ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
+    let client = read_maps_client(ctx).await;
 
     let res = resolve_location(location, &client).await;
 
