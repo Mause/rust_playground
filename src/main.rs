@@ -34,6 +34,10 @@ struct General;
 #[async_trait]
 impl EventHandler for Handler {}
 
+struct MapsClientHolder {
+    client: ClientSettings
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
@@ -46,10 +50,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = connect_to_postgres().await?;
 
+    let maps_client =
+        ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
+
     let token = env::var("BOT_TOKEN").expect("token");
     let mut client = Client::builder(token)
         .event_handler(Handler)
         .type_map_insert::<ClientHolder>(ClientHolder { client })
+        .type_map_insert::<MapsClientHolder>(MapsClientHolder { maps_client })
         .framework(framework)
         .await
         .expect("Error creating client");
@@ -70,9 +78,8 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     }
 
     let location = args.message();
-
-    let client =
-        ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
+    
+    let client = read_maps_client(ctx).await;
 
     let res = resolve_location(location, &client).await;
 
