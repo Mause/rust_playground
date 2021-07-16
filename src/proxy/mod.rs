@@ -156,7 +156,6 @@ fn create_identity(
     parent: &X509Ref,
     parent_key: &PKeyRef<Private>,
 ) -> (openssl::x509::X509, native_tls::Identity) {
-    let cn = "mause.me";
     let (cert, key) = crate::proxy::identity::mk_ca_signed_cert(cn, parent, parent_key).unwrap();
 
     let password = "password";
