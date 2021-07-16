@@ -72,8 +72,8 @@ impl Proxy {
     }
 }
 
-#[derive(Debug)]
-struct Request {
+#[derive(Debug, Clone)]
+pub struct Request {
     error: Option<String>,
     path: Option<String>,
     method: Option<String>,
