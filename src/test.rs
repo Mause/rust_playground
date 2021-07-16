@@ -96,8 +96,12 @@ fn it_works() {
     );
 
     proxy.register(
-        Mock::new("GET", "/maps/api/geocode/json?key=APIKEY&address=Perth&region=au")
-        .create());
+        Mock::new(
+            "GET",
+            "/maps/api/geocode/json?key=APIKEY&address=Perth&region=au",
+        )
+        .create(),
+    );
 
     proxy.start();
 
