@@ -23,7 +23,7 @@ pub async fn resolve_location(
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
     let res = client
         .geocoding()
-        .with_address(&location)
+        .with_address(location)
         .with_region(Region::Australia)
         .execute()
         .await
