@@ -15,6 +15,7 @@ use simple_logger::SimpleLogger;
 use std::env;
 use tokio_pg_mapper::FromTokioPostgresRow;
 use tokio_postgres::Row;
+use google_maps::prelude::ClientSettings;
 
 mod client_holder;
 mod db;
