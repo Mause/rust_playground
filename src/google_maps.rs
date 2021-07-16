@@ -20,9 +20,8 @@ impl Error for SimpleError {
 
 pub async fn resolve_location(
     location: &str,
+    client: &ClientSettings,
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-    let client =
-        ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
     let res = client
         .geocoding()
         .with_address(&location)
