@@ -1,5 +1,9 @@
 [package]
 name = "mock_proxy"
+license = "MIT"
+description = "A simple way to mock out API's if you can set a proxy"
+repository = "https://github.com/Mause/rust_playground/tree/master/mock_proxy"
+authors = ["Elliana May"]
 version = "0.1.0"
 edition = "2018"
 
