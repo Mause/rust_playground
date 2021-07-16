@@ -35,7 +35,7 @@ struct General;
 impl EventHandler for Handler {}
 
 struct MapsClientHolder {
-    client: ClientSettings
+    client: ClientSettings,
 }
 
 #[tokio::main]
@@ -78,7 +78,7 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     }
 
     let location = args.message();
-    
+
     let client = read_maps_client(ctx).await;
 
     let res = resolve_location(location, &client).await;
