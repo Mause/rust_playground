@@ -1,6 +1,7 @@
 use crate::client_holder::{read_client, ClientHolder};
 use crate::db::{connect_to_postgres, Location, U64};
 use crate::google_maps::resolve_location;
+use ::google_maps::prelude::ClientSettings;
 use deadpool_postgres::tokio_postgres;
 use dotenv::dotenv;
 use log::{info, set_max_level, LevelFilter};
@@ -15,7 +16,6 @@ use simple_logger::SimpleLogger;
 use std::env;
 use tokio_pg_mapper::FromTokioPostgresRow;
 use tokio_postgres::Row;
-use ::google_maps::prelude::ClientSettings;
 
 mod client_holder;
 mod db;
