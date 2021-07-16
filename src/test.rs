@@ -15,9 +15,9 @@ use std::sync::Arc;
 use tokio_test::block_on;
 
 fn build_context(proxy: &Proxy) -> Context {
-    let typemap = TypeMap::new();
+    let mut typemap = TypeMap::new();
     let maps_client = ClientSettings::new("");
-    typemap.insert::<ClientSettings>(MapsClientHolder { maps_client });
+    typemap.insert::<MapsClientHolder>(MapsClientHolder { maps_client });
     let data = Arc::new(RwLock::new(typemap));
 
     let shard_id = 0;
