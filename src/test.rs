@@ -1,6 +1,6 @@
-use crate::proxy::{Mock, Proxy};
 use crate::{ClientSettings, MapsClientHolder};
 use log::{set_max_level, LevelFilter};
+use mock_proxy::{Mock, Proxy};
 use serenity::client::bridge::gateway::ShardMessenger;
 use serenity::client::Cache;
 use serenity::client::Context;

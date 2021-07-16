@@ -1,4 +1,4 @@
-use crate::proxy::Request;
+use crate::Request;
 use http::status::StatusCode;
 
 #[derive(Debug, Clone)]

@@ -857,6 +857,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mock_proxy"
+version = "0.1.0"
+dependencies = [
+ "http",
+ "httparse",
+ "json",
+ "log",
+ "native-tls",
+ "openssl",
+]
+
+[[package]]
 name = "mockito"
 version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1360,14 +1372,12 @@ dependencies = [
  "deadpool-postgres",
  "dotenv",
  "google_maps",
- "http",
- "httparse",
  "json",
  "lexical-core",
  "log",
+ "mock_proxy",
  "mockito",
  "native-tls",
- "openssl",
  "postgres-native-tls",
  "reqwest",
  "rust_decimal",

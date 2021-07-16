@@ -30,7 +30,5 @@ serde = "*"
 serde_json = "*"
 tokio-test = "*"
 mockito = "*"
-httparse = "*"
-openssl = "*"
-http = "*"
 json = "*"
+mock_proxy = {path = "./mock_proxy"}
