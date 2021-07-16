@@ -70,7 +70,10 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let location = args.message();
 
-    let res = resolve_location(location).await;
+    let client =
+        ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
+
+    let res = resolve_location(location, &client).await;
 
     match res {
         Err(e) => {
