@@ -1,6 +1,7 @@
 use crate::client_holder::{read_client, ClientHolder};
 use crate::db::{connect_to_postgres, Location, U64};
 use crate::google_maps::resolve_location;
+use ::google_maps::prelude::ClientSettings;
 use deadpool_postgres::tokio_postgres;
 use dotenv::dotenv;
 use log::{info, set_max_level, LevelFilter};
@@ -70,7 +71,10 @@ async fn store(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
 
     let location = args.message();
 
-    let res = resolve_location(location).await;
+    let client =
+        ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
+
+    let res = resolve_location(location, &client).await;
 
     match res {
         Err(e) => {
