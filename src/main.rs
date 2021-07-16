@@ -1,4 +1,4 @@
-use crate::client_holder::{read_client, ClientHolder, MapsClientHolder};
+use crate::client_holder::{read_client, read_maps_client, ClientHolder, MapsClientHolder};
 use crate::db::{connect_to_postgres, Location, U64};
 use crate::google_maps::resolve_location;
 use ::google_maps::prelude::ClientSettings;
