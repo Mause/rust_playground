@@ -100,6 +100,39 @@ fn it_works() {
             "GET",
             "/maps/api/geocode/json?key=APIKEY&address=Perth&region=au",
         )
+        .with_body_from_json(json::object! {
+            status: "OK",
+            results: [
+                {
+                    address_components: [{
+                        long_name: "",
+                        short_name: "",
+                        types: []
+                    }],
+                    geometry: {
+                        location: {
+                            lat: -33.866651,
+                            lng: 151.195827
+                        },
+                        location_type: "GeometricCenter",
+                        "viewport" : {
+                            "northeast" : {
+                               "lat" : 37.4238253802915,
+                               "lng" : -122.0829009197085
+                            },
+                            "southwest" : {
+                               "lat" : 37.4211274197085,
+                               "lng" : -122.0855988802915
+                            }
+                        }
+                    },
+                    "place_id" : "ChIJ2eUgeAK6j4ARbn5u_wAGqWA",
+                    formatted_address: "",
+                    "types" : [ "street_address" ]
+                }
+            ]
+        })
+        .unwrap()
         .create(),
     );
 
@@ -109,7 +142,7 @@ fn it_works() {
 
     let message = build_message();
 
-    let res = crate::store(&context, &message, Args::new("", &[]));
+    let res = crate::store(&context, &message, Args::new("Perth", &[]));
 
     let ares = block_on(res).unwrap();
 
