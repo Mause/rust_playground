@@ -1,8 +1,8 @@
+use ::google_maps::prelude::ClientSettings;
 use deadpool_postgres::Manager;
 use deadpool_postgres::Pool;
 use serenity::client::Context;
 use serenity::prelude::TypeMapKey;
-use ::google_maps::prelude::ClientSettings;
 
 pub struct ClientHolder {
     pub client: Pool,
@@ -13,13 +13,12 @@ impl TypeMapKey for ClientHolder {
 }
 
 pub struct MapsClientHolder {
-    pub maps_client: ClientSettings
+    pub maps_client: ClientSettings,
 }
 
 impl TypeMapKey for MapsClientHolder {
     type Value = MapsClientHolder;
 }
-
 
 pub async fn read_maps_client(ctx: &Context) -> ClientSettings {
     let map_guard = ctx.data.read().await;
