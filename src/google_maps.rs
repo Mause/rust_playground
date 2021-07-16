@@ -25,7 +25,7 @@ pub async fn resolve_location(
         ClientSettings::new(&env::var("GOOGLE_MAPS_API_KEY").expect("GOOGLE_MAPS_API_KEY"));
     let res = client
         .geocoding()
-        .with_address(&location)
+        .with_address(location)
         .with_region(Region::Australia)
         .execute()
         .await
