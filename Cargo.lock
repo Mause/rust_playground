@@ -527,13 +527,13 @@ dependencies = [
 
 [[package]]
 name = "google_maps"
-version = "2.0.1"
-source = "git+https://github.com/leontoeides/google_maps#902763c29e134684bddb24c440e20428dcee876a"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d1c09112efcd3486ce3c90b698bb798688055ca753d9cdd0b47497a01b953665"
 dependencies = [
  "chrono",
  "chrono-tz",
  "futures",
- "log",
  "percent-encoding",
  "rand 0.8.1",
  "reqwest",
@@ -543,6 +543,8 @@ dependencies = [
  "serde_json",
  "stream_throttle",
  "tokio",
+ "tracing",
+ "tracing-futures",
 ]
 
 [[package]]
