@@ -16,6 +16,8 @@ impl Default for Response {
         }
     }
 }
+
+/// The struct used to define mock responses
 #[derive(Debug, Clone)]
 pub struct Mock {
     pub path: String,
@@ -31,6 +33,7 @@ impl Mock {
         }
     }
 
+    /// Reads the response body from disk
     pub fn with_body_from_file(
         &mut self,
         filename: &str,
@@ -39,6 +42,7 @@ impl Mock {
         Ok(self)
     }
 
+    /// Sets the response body to anything with [`Into<json::JsonValue>`]
     pub fn with_body_from_json<T>(
         &mut self,
         value: T,
@@ -54,7 +58,7 @@ impl Mock {
         self.clone()
     }
 
-    pub fn matches(&self, request: &Request) -> bool {
+    pub(super) fn matches(&self, request: &Request) -> bool {
         &self.path == request.path.as_ref().unwrap()
             && &self.method == request.method.as_ref().unwrap()
     }
