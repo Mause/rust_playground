@@ -1,9 +1,12 @@
+//! This library was built to help test systems that use libraries which don't provide any
+//! testing utilities themselves. It works by overriding the proxy and root ca attributes
+//! and intercepting proxy requests, then returning mock responses defined by the user
+
 use crate::mock::Response;
 use log::{error, info};
 use native_tls::TlsStream;
 use openssl::pkey::{PKey, PKeyRef, Private};
 use openssl::x509::X509Ref;
-use std::fmt::Write;
 use std::io::{Read, Write as IOWrite};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::sync::mpsc;
@@ -15,6 +18,7 @@ pub use crate::mock::Mock;
 
 const SERVER_ADDRESS_INTERNAL: &str = "127.0.0.1:1234";
 
+/// Primary interface for the library
 pub struct Proxy {
     mocks: Vec<Mock>,
     listening_addr: Option<SocketAddr>,
@@ -43,6 +47,9 @@ impl Proxy {
         Self::default()
     }
 
+    /// Register a given mock with the proxy
+    ///
+    /// Will panic if proxy has already been started
     pub fn register(&mut self, mock: Mock) {
         if self.started {
             panic!("Cannot add mocks to a started proxy");
@@ -50,32 +57,37 @@ impl Proxy {
         self.mocks.push(mock);
     }
 
+    /// Start the proxy server
+    ///
+    /// Will panic if proxy has already been started
     pub fn start(&mut self) {
         start_proxy(self);
     }
 
+    /// Start the server
+    pub fn stop(&mut self) {
+        todo!();
+    }
+
     /// Address and port of the local server.
     /// Can be used with `std::net::TcpStream`.
-    ///
-    /// The server will be started if necessary.
     pub fn address(&self) -> SocketAddr {
         self.listening_addr.expect("server should be listening")
     }
 
     /// A local `http://…` URL of the server.
-    ///
-    /// The server will be started if necessary.
     pub fn url(&self) -> String {
         format!("http://{}", self.address())
     }
 
+    /// Returns the root CA certificate of the server
     pub fn get_certificate(&self) -> Vec<u8> {
         self.cert.to_pem().unwrap().clone()
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct Request {
+struct Request {
     error: Option<String>,
     path: Option<String>,
     method: Option<String>,
@@ -84,9 +96,10 @@ pub struct Request {
 
 impl std::fmt::Display for Request {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        f.write_str("Request {")?;
-        f.write_char('}')?;
-        Ok(())
+        f.debug_struct("Request")
+            .field("method", &self.method)
+            .field("path", &self.path)
+            .finish_non_exhaustive()
     }
 }
 impl Request {

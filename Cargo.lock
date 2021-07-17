@@ -860,7 +860,7 @@ dependencies = [
 
 [[package]]
 name = "mock_proxy"
-version = "0.1.0"
+version = "0.1.2-rc.1"
 dependencies = [
  "http",
  "httparse",
