@@ -860,9 +860,9 @@ dependencies = [
 
 [[package]]
 name = "mock_proxy"
-version = "0.1.2-rc.2"
+version = "0.1.3-alpha.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53754b247e685cf3cb4b9d07f0b6688b5c84de783d8f7e7087d0af9f18f39e10"
+checksum = "ae097a6b241f88700d6683528c16ef794ec145a8a948a7bb4d87945825f50167"
 dependencies = [
  "http",
  "httparse",
