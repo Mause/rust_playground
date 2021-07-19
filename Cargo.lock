@@ -112,6 +112,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
+name = "backoff"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9fe17f59a06fe8b87a6fc8bf53bb70b3aba76d7685f432487a68cd5552853625"
+dependencies = [
+ "futures-core",
+ "getrandom 0.2.1",
+ "instant",
+ "pin-project 1.0.3",
+ "rand 0.8.1",
+ "tokio",
+]
+
+[[package]]
 name = "base64"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -527,22 +541,21 @@ dependencies = [
 
 [[package]]
 name = "google_maps"
-version = "2.0.2"
+version = "2.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d1c09112efcd3486ce3c90b698bb798688055ca753d9cdd0b47497a01b953665"
+checksum = "4fec566b76dad3b51cafa4eb8a778ff797acfb89e1083bd18dff97f6b91ba8bf"
 dependencies = [
+ "backoff",
  "chrono",
  "chrono-tz",
  "futures",
  "percent-encoding",
- "rand 0.8.1",
  "reqwest",
  "rust_decimal",
  "rust_decimal_macros",
  "serde",
  "serde_json",
  "stream_throttle",
- "tokio",
  "tracing",
  "tracing-futures",
 ]
