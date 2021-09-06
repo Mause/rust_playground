@@ -22,7 +22,7 @@ log = "*"
 simple_logger = "*"
 deadpool-postgres = "0.9.0"
 deadpool = "0.8"
-lexical-core = { version = "=0.7.6" }                            # override to version that compiles on nightly
+lexical-core = { version = "=0.8.0" }                            # override to version that compiles on nightly
 
 [dev-dependencies]
 reqwest = "0.11.4"
