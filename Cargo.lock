@@ -318,6 +318,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "deadpool"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "51dc1e92ba8164da131a4753a26cb1e7ebcfe617e56bb3c2b6136049c8ee5730"
+dependencies = [
+ "async-trait",
+ "deadpool-runtime",
+ "num_cpus",
+ "tokio",
+]
+
+[[package]]
 name = "deadpool-postgres"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -325,13 +337,19 @@ checksum = "1586368a579e26f158266d0a415bcb5df04a64b65913b2a31715d97987bd4d44"
 dependencies = [
  "async-trait",
  "config",
- "deadpool",
+ "deadpool 0.8.2",
  "futures",
  "log",
  "serde",
  "tokio",
  "tokio-postgres",
 ]
+
+[[package]]
+name = "deadpool-runtime"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eaa37046cc0f6c3cc6090fbdbf73ef0b8ef4cfcc37f6befc0020f63e8cf121e1"
 
 [[package]]
 name = "difference"
@@ -1448,7 +1466,7 @@ name = "rust"
 version = "0.1.0"
 dependencies = [
  "bytes 1.1.0",
- "deadpool",
+ "deadpool 0.9.1",
  "deadpool-postgres",
  "dotenv",
  "google_maps",
