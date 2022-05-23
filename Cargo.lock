@@ -318,6 +318,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "deadpool"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "421fe0f90f2ab22016f32a9881be5134fdd71c65298917084b0c7477cbc3856e"
+dependencies = [
+ "async-trait",
+ "deadpool-runtime",
+ "num_cpus",
+ "retain_mut",
+ "tokio",
+]
+
+[[package]]
 name = "deadpool-postgres"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -325,13 +338,19 @@ checksum = "1586368a579e26f158266d0a415bcb5df04a64b65913b2a31715d97987bd4d44"
 dependencies = [
  "async-trait",
  "config",
- "deadpool",
+ "deadpool 0.8.2",
  "futures",
  "log",
  "serde",
  "tokio",
  "tokio-postgres",
 ]
+
+[[package]]
+name = "deadpool-runtime"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eaa37046cc0f6c3cc6090fbdbf73ef0b8ef4cfcc37f6befc0020f63e8cf121e1"
 
 [[package]]
 name = "difference"
@@ -1429,6 +1448,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "retain_mut"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4389f1d5789befaf6029ebd9f7dac4af7f7e3d61b69d4f30e2ac02b57e7712b0"
+
+[[package]]
 name = "ring"
 version = "0.16.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1448,7 +1473,7 @@ name = "rust"
 version = "0.1.0"
 dependencies = [
  "bytes 1.1.0",
- "deadpool",
+ "deadpool 0.9.5",
  "deadpool-postgres",
  "dotenv",
  "google_maps",
